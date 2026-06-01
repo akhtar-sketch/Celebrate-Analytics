@@ -1,0 +1,1228 @@
+{
+  "name": "Celebrate Pulse - Testing",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://googleads.googleapis.com/v20/customers/3158644952/googleAds:search ",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleAdsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "developer-token",
+              "value": "b7Jj7ADOuQn-eCJnYL9p-g"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  query: `\n    SELECT\n      customer.id,\n      customer.descriptive_name,\n      campaign.id,\n      campaign.name,\n      segments.week,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.cost_micros,\n      metrics.conversions\n    FROM campaign\n    WHERE segments.date BETWEEN '${$('Get Req. Dates1').first().json.current_q_start}'\n      AND '${$('Get Req. Dates1').first().json.current_q_end}'\n  `\n}\n}}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        784
+      ],
+      "id": "c350af11-f206-4dc3-8a8c-6216ecd8e0d1",
+      "name": "Springfield - Get Google Current Q",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "googleAdsOAuth2Api": {
+          "id": "OHWAGJdokBHrnA3Z",
+          "name": "Google Ads account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://googleads.googleapis.com/v20/customers/3158644952/googleAds:search ",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleAdsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "developer-token",
+              "value": "b7Jj7ADOuQn-eCJnYL9p-g"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  query: `\n    SELECT\n      customer.id,\n      customer.descriptive_name,\n      campaign.id,\n      campaign.name,\n      segments.week,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.cost_micros,\n      metrics.conversions\n    FROM campaign\n    WHERE segments.date BETWEEN '${$('Get Req. Dates1').first().json.prev_q_start}'\n      AND '${$('Get Req. Dates1').first().json.prev_q_end}'\n  `\n}\n}}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        1184
+      ],
+      "id": "84fd4cdd-c2db-4e89-b297-54709f5f919a",
+      "name": "Springfield - Get Google Prev Q",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "googleAdsOAuth2Api": {
+          "id": "OHWAGJdokBHrnA3Z",
+          "name": "Google Ads account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = items[0].json.results || [];\n\nconst weekMap = {};\nconst campaignMap = {};\n\nfor (const r of results) {\n  const week  = r.segments?.week || 'unknown';\n  const cost  = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr  = Number(r.metrics?.impressions || 0);\n  const clks  = Number(r.metrics?.clicks || 0);\n  const conv  = Number(r.metrics?.conversions || 0);\n\n  if (!weekMap[week]) weekMap[week] = { week_start: week, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  weekMap[week].spend       += cost;\n  weekMap[week].impressions += impr;\n  weekMap[week].clicks      += clks;\n  weekMap[week].conversions += conv;\n\n  const cId   = String(r.campaign?.id || '');\n  const cName = r.campaign?.name || 'Unknown';\n  if (!campaignMap[cId]) campaignMap[cId] = { campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  campaignMap[cId].spend       += cost;\n  campaignMap[cId].impressions += impr;\n  campaignMap[cId].clicks      += clks;\n  campaignMap[cId].conversions += conv;\n}\n\nconst weekly = Object.values(weekMap)\n  .sort((a, b) => a.week_start.localeCompare(b.week_start))\n  .map(w => ({\n    ...w,\n    spend: Number(w.spend.toFixed(2)),\n    ctr:   w.impressions > 0 ? Number((w.clicks / w.impressions * 100).toFixed(4)) : 0,\n    cpl:   w.conversions > 0 ? Number((w.spend  / w.conversions).toFixed(2))       : null\n  }));\n\nconst totals = weekly.reduce((a, w) => ({\n  spend:       a.spend       + w.spend,\n  impressions: a.impressions + w.impressions,\n  clicks:      a.clicks      + w.clicks,\n  conversions: a.conversions + w.conversions\n}), { spend: 0, impressions: 0, clicks: 0, conversions: 0 });\ntotals.spend = Number(totals.spend.toFixed(2));\ntotals.ctr   = totals.impressions > 0 ? Number((totals.clicks / totals.impressions * 100).toFixed(4)) : 0;\ntotals.cpl   = totals.conversions > 0 ? Number((totals.spend  / totals.conversions).toFixed(2))       : null;\n\nconst topCampaigns = Object.values(campaignMap)\n  .sort((a, b) => b.spend - a.spend).slice(0, 5)\n  .map(c => ({\n    ...c,\n    spend: Number(c.spend.toFixed(2)),\n    ctr:   c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : 0,\n    cpl:   c.conversions > 0 ? Number((c.spend  / c.conversions).toFixed(2))       : null\n  }));\n\nconst accountName = results[0]?.customer?.descriptiveName || 'Springfield';\n\nreturn [{ json: { current_weekly: weekly, current_totals: totals, current_top_campaigns: topCampaigns, account_name: accountName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        784
+      ],
+      "id": "97ccbb2d-a490-4d83-ac2c-e011cfc21e78",
+      "name": "Springfield - Aggregate Google Current Q"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = items[0].json.results || [];\n\nconst weekMap = {};\n\nfor (const r of results) {\n  const week  = r.segments?.week || 'unknown';\n  const cost  = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr  = Number(r.metrics?.impressions || 0);\n  const clks  = Number(r.metrics?.clicks || 0);\n  const conv  = Number(r.metrics?.conversions || 0);\n\n  if (!weekMap[week]) weekMap[week] = { week_start: week, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  weekMap[week].spend       += cost;\n  weekMap[week].impressions += impr;\n  weekMap[week].clicks      += clks;\n  weekMap[week].conversions += conv;\n}\n\nconst weekly = Object.values(weekMap)\n  .sort((a, b) => a.week_start.localeCompare(b.week_start))\n  .map(w => ({\n    ...w,\n    spend: Number(w.spend.toFixed(2)),\n    ctr:   w.impressions > 0 ? Number((w.clicks / w.impressions * 100).toFixed(4)) : 0,\n    cpl:   w.conversions > 0 ? Number((w.spend  / w.conversions).toFixed(2))       : null\n  }));\n\nconst totals = weekly.reduce((a, w) => ({\n  spend:       a.spend       + w.spend,\n  impressions: a.impressions + w.impressions,\n  clicks:      a.clicks      + w.clicks,\n  conversions: a.conversions + w.conversions\n}), { spend: 0, impressions: 0, clicks: 0, conversions: 0 });\ntotals.spend = Number(totals.spend.toFixed(2));\ntotals.ctr   = totals.impressions > 0 ? Number((totals.clicks / totals.impressions * 100).toFixed(4)) : 0;\ntotals.cpl   = totals.conversions > 0 ? Number((totals.spend  / totals.conversions).toFixed(2))       : null;\n\nreturn [{ json: { prev_weekly: weekly, prev_totals: totals } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        1184
+      ],
+      "id": "b8dc149d-ad9e-40f9-ab66-03faf33f6e57",
+      "name": "Springfield - Aggregate Google Prev Q"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        832,
+        992
+      ],
+      "id": "2eefc4f4-9209-4994-b884-6a5d7fc66d19",
+      "name": "Springfield - Merge Google Quarters"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\n// Updated node reference\nconst dates = $('Get Req. Dates1').first().json;\n\nconst location_id = 'springfield';\n\nconst location_name = d.account_name || 'Springfield';\n\nconst platform = 'google';\n\nconst {\n  quarter,\n  year,\n  prev_quarter,\n  prev_year\n} = dates;\n\n// ─────────────────────────────────────\n// weekly_metrics rows\n// ─────────────────────────────────────\n\nconst weeklyRows = (d.current_weekly || []).map(w => ({\n\n  location_id,\n\n  location_name,\n\n  platform,\n\n  quarter,\n\n  year,\n\n  week_start: w.week_start,\n\n  spend: Number(w.spend || 0),\n\n  impressions: Number(w.impressions || 0),\n\n  clicks: Number(w.clicks || 0),\n\n  conversions: Number(w.conversions || 0),\n\n  cpl: w.cpl !== null && w.cpl !== undefined\n    ? Number(w.cpl)\n    : null,\n\n  ctr: Number(w.ctr || 0)\n\n}));\n\n// ─────────────────────────────────────\n// quarterly_summary row\n// ─────────────────────────────────────\n\nconst summaryRow = {\n\n  location_id,\n\n  location_name,\n\n  platform,\n\n  quarter,\n\n  year,\n\n  total_spend: Number(d.current_totals?.spend || 0),\n\n  total_impressions: Number(d.current_totals?.impressions || 0),\n\n  total_clicks: Number(d.current_totals?.clicks || 0),\n\n  total_conversions: Number(d.current_totals?.conversions || 0),\n\n  cpl: d.current_totals?.cpl !== null &&\n       d.current_totals?.cpl !== undefined\n    ? Number(d.current_totals.cpl)\n    : null,\n\n  ctr: Number(d.current_totals?.ctr || 0),\n\n  prev_quarter,\n\n  prev_year,\n\n  prev_total_spend: Number(d.prev_totals?.spend || 0),\n\n  prev_total_conversions: Number(d.prev_totals?.conversions || 0),\n\n  prev_cpl: d.prev_totals?.cpl !== null &&\n            d.prev_totals?.cpl !== undefined\n    ? Number(d.prev_totals.cpl)\n    : null,\n\n  prev_ctr: Number(d.prev_totals?.ctr || 0)\n\n};\n\n// ─────────────────────────────────────\n// top_campaigns rows\n// ─────────────────────────────────────\n\nconst campaignRows = (d.current_top_campaigns || []).map(c => ({\n\n  location_id,\n\n  platform,\n\n  quarter,\n\n  year,\n\n  campaign_id: String(c.campaign_id || ''),\n\n  campaign_name: c.campaign_name || '',\n\n  spend: Number(c.spend || 0),\n\n  impressions: Number(c.impressions || 0),\n\n  clicks: Number(c.clicks || 0),\n\n  conversions: Number(c.conversions || 0),\n\n  cpl: c.cpl !== null && c.cpl !== undefined\n    ? Number(c.cpl)\n    : null,\n\n  ctr: Number(c.ctr || 0)\n\n}));\n\nreturn [\n  {\n    json: {\n\n      weekly_metrics: weeklyRows,\n\n      quarterly_summary: summaryRow,\n\n      top_campaigns: campaignRows\n\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        992
+      ],
+      "id": "bfb4d13c-28a8-4981-a996-530426f2f84a",
+      "name": "Springfield - Format Google for Supabase"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials1').first().json.meta_api_version }}/act_{{ $('Set Meta Credentials1').first().json.west_republic }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials1').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates1').first().json.current_q_start }}\",\"until\":\"{{ $('Get Req. Dates1').first().json.current_q_end }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "7"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        1616
+      ],
+      "id": "f22f593b-0e4d-4fdc-8ce9-7ecf2607613f",
+      "name": "West Republic - Get Meta Current Q",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials1').first().json.meta_api_version }}/act_{{ $('Set Meta Credentials1').first().json.west_republic }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials1').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates1').first().json.prev_q_start }}\",\"until\":\"{{ $('Get Req. Dates1').first().json.prev_q_end }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "7"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        2016
+      ],
+      "id": "461eaaf9-98f2-464a-ba6e-c311347e4cfa",
+      "name": "West Republic - Get Meta Prev Q",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials  = $('Set Meta Credentials1').first().json;\nconst convTypes    = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst weekMap    = {};\nconst campaignMap = {};\n\nfor (const r of data) {\n  const week  = r.date_start || 'unknown';\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv  = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend = Number(r.spend || 0);\n  const impr  = Number(r.impressions || 0);\n  const clks  = Number(r.clicks || 0);\n\n  if (!weekMap[week]) weekMap[week] = { week_start: week, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  weekMap[week].spend       += spend;\n  weekMap[week].impressions += impr;\n  weekMap[week].clicks      += clks;\n  weekMap[week].conversions += conv;\n\n  const cId   = r.campaign_id   || '';\n  const cName = r.campaign_name || 'Unknown';\n  if (!campaignMap[cId]) campaignMap[cId] = { campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  campaignMap[cId].spend       += spend;\n  campaignMap[cId].impressions += impr;\n  campaignMap[cId].clicks      += clks;\n  campaignMap[cId].conversions += conv;\n}\n\nconst weekly = Object.values(weekMap)\n  .sort((a, b) => a.week_start.localeCompare(b.week_start))\n  .map(w => ({\n    ...w,\n    spend: Number(w.spend.toFixed(2)),\n    ctr:   w.impressions > 0 ? Number((w.clicks / w.impressions * 100).toFixed(4)) : 0,\n    cpl:   w.conversions > 0 ? Number((w.spend  / w.conversions).toFixed(2))       : null\n  }));\n\nconst totals = weekly.reduce((a, w) => ({\n  spend:       a.spend       + w.spend,\n  impressions: a.impressions + w.impressions,\n  clicks:      a.clicks      + w.clicks,\n  conversions: a.conversions + w.conversions\n}), { spend: 0, impressions: 0, clicks: 0, conversions: 0 });\ntotals.spend = Number(totals.spend.toFixed(2));\ntotals.ctr   = totals.impressions > 0 ? Number((totals.clicks / totals.impressions * 100).toFixed(4)) : 0;\ntotals.cpl   = totals.conversions > 0 ? Number((totals.spend  / totals.conversions).toFixed(2))       : null;\n\nconst topCampaigns = Object.values(campaignMap)\n  .sort((a, b) => b.spend - a.spend).slice(0, 5)\n  .map(c => ({\n    ...c,\n    spend: Number(c.spend.toFixed(2)),\n    ctr:   c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : 0,\n    cpl:   c.conversions > 0 ? Number((c.spend  / c.conversions).toFixed(2))       : null\n  }));\n\nconst accountName = data[0]?.account_name || 'West Republic';\n\nreturn [{ json: { current_weekly: weekly, current_totals: totals, current_top_campaigns: topCampaigns, account_name: accountName } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        1616
+      ],
+      "id": "0bfbc562-1d75-4b1d-af88-59fe095e47ce",
+      "name": "West Republic - Aggregate Meta Current Q"
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials = $('Set Meta Credentials1').first().json;\nconst convTypes   = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst weekMap = {};\n\nfor (const r of data) {\n  const week    = r.date_start || 'unknown';\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv    = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend   = Number(r.spend || 0);\n  const impr    = Number(r.impressions || 0);\n  const clks    = Number(r.clicks || 0);\n\n  if (!weekMap[week]) weekMap[week] = { week_start: week, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  weekMap[week].spend       += spend;\n  weekMap[week].impressions += impr;\n  weekMap[week].clicks      += clks;\n  weekMap[week].conversions += conv;\n}\n\nconst weekly = Object.values(weekMap)\n  .sort((a, b) => a.week_start.localeCompare(b.week_start))\n  .map(w => ({\n    ...w,\n    spend: Number(w.spend.toFixed(2)),\n    ctr:   w.impressions > 0 ? Number((w.clicks / w.impressions * 100).toFixed(4)) : 0,\n    cpl:   w.conversions > 0 ? Number((w.spend  / w.conversions).toFixed(2))       : null\n  }));\n\nconst totals = weekly.reduce((a, w) => ({\n  spend:       a.spend       + w.spend,\n  impressions: a.impressions + w.impressions,\n  clicks:      a.clicks      + w.clicks,\n  conversions: a.conversions + w.conversions\n}), { spend: 0, impressions: 0, clicks: 0, conversions: 0 });\ntotals.spend = Number(totals.spend.toFixed(2));\ntotals.ctr   = totals.impressions > 0 ? Number((totals.clicks / totals.impressions * 100).toFixed(4)) : 0;\ntotals.cpl   = totals.conversions > 0 ? Number((totals.spend  / totals.conversions).toFixed(2))       : null;\n\nreturn [{ json: { prev_weekly: weekly, prev_totals: totals } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        2016
+      ],
+      "id": "8a380c4e-2061-4f08-a2cc-69a254798b08",
+      "name": "West Republic - Aggregate Meta Prev Q"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1280,
+        1824
+      ],
+      "id": "1f32ebd9-7432-4136-8a48-6aa551996b0a",
+      "name": "West Republic - Merge Meta Quarters"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d     = items[0].json;\nconst dates = $('Get Req. Dates1').first().json;\n\nconst location_id   = 'west-republic';\nconst location_name = d.account_name || 'West Republic';\nconst platform      = 'meta';\nconst { quarter, year, prev_quarter, prev_year } = dates;\n\nconst weeklyRows = (d.current_weekly || []).map(w => ({\n  location_id,\n  location_name,\n  platform,\n  quarter,\n  year,\n  week_start:  w.week_start,\n  spend:       w.spend,\n  impressions: w.impressions,\n  clicks:      w.clicks,\n  conversions: w.conversions,\n  cpl:         w.cpl,\n  ctr:         w.ctr\n}));\n\nconst summaryRow = {\n  location_id,\n  location_name,\n  platform,\n  quarter,\n  year,\n  total_spend:        d.current_totals?.spend        ?? 0,\n  total_impressions:  d.current_totals?.impressions  ?? 0,\n  total_clicks:       d.current_totals?.clicks       ?? 0,\n  total_conversions:  d.current_totals?.conversions  ?? 0,\n  cpl:                d.current_totals?.cpl          ?? null,\n  ctr:                d.current_totals?.ctr          ?? 0,\n  prev_quarter,\n  prev_year,\n  prev_total_spend:       d.prev_totals?.spend       ?? 0,\n  prev_total_conversions: d.prev_totals?.conversions ?? 0,\n  prev_cpl:               d.prev_totals?.cpl         ?? null,\n  prev_ctr:               d.prev_totals?.ctr         ?? 0\n};\n\nconst campaignRows = (d.current_top_campaigns || []).map(c => ({\n  location_id,\n  platform,\n  quarter,\n  year,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         c.spend,\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:           c.cpl,\n  ctr:           c.ctr\n}));\n\nreturn [{ json: { weekly_metrics: weeklyRows, quarterly_summary: summaryRow, top_campaigns: campaignRows } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        1824
+      ],
+      "id": "1d89d0d4-6e25-4d59-9981-f42a2128af47",
+      "name": "West Republic - Format Meta for Supabase"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sb-0001",
+              "name": "supabase_url",
+              "value": "https://jadmrftsvtklvgvsonoo.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "sb-0002",
+              "name": "supabase_service_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI3MzE4MCwiZXhwIjoyMDk0ODQ5MTgwfQ.zu9dOTIhkSNO0fbdQTN7f-F0OFYI8-1RXyvcZNYEYdU",
+              "type": "string"
+            },
+            {
+              "id": "sb-0003",
+              "name": "supabase_anon_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzMxODAsImV4cCI6MjA5NDg0OTE4MH0.gjpbPb96aVW2tfiWA7Nw917fJQERyckIyGUKmvQft8U",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -832,
+        1424
+      ],
+      "id": "23829e03-d144-4f97-bd95-2049904781b8",
+      "name": "Set Supabase Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst m = now.getMonth();\nconst y = now.getFullYear();\nconst qi = Math.floor(m / 3);\n\nconst qStarts   = [0, 3, 6, 9];\nconst qEnds     = [2, 5, 8, 11];\nconst qLastDays = [31, 30, 30, 31];\n\nconst cqs = new Date(y, qStarts[qi], 1).toISOString().split('T')[0];\nconst cqe = new Date(y, qEnds[qi], qLastDays[qi]).toISOString().split('T')[0];\n\nconst pqi = qi === 0 ? 3 : qi - 1;\nconst py  = qi === 0 ? y - 1 : y;\nconst pqs = new Date(py, qStarts[pqi], 1).toISOString().split('T')[0];\nconst pqe = new Date(py, qEnds[pqi], qLastDays[pqi]).toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    current_q_start: cqs,\n    current_q_end:   cqe,\n    prev_q_start:    pqs,\n    prev_q_end:      pqe,\n    quarter:         'Q' + (qi + 1),\n    year:            y,\n    prev_quarter:    'Q' + (pqi + 1),\n    prev_year:       py\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1040,
+        1424
+      ],
+      "id": "9a078df0-12e5-4d81-b9ed-187bc59c70be",
+      "name": "Get Req. Dates1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "meta_access_token",
+              "value": "EAAEAq6mB210BRbiOEdZBSX7um26ZCEHuBRCEBqO5n6VrPQZAi0tx5zDhIZByLcfANhZBZAwZAZBXU8GNBliBGQxpTKqF6wQ1vkERPg44zgZAzsFrZAGQrkwvcNoK3naV317Ni0gQOSMgmCTdFp7sxzOjHch1Ru4Skrc0c2wrHJ8GdvGQZCvRPMU4zJPC7KAmEz7q1rZBhAZDZD",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "meta_api_version",
+              "value": "v25.0",
+              "type": "string"
+            },
+            {
+              "id": "757ba073-039a-48e3-a844-413016190d19",
+              "name": "meta_conversion_action_types",
+              "value": "lead",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "west_republic",
+              "value": "885038680320071",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "meta_account_1_name",
+              "value": "CD - West Republic",
+              "type": "string"
+            },
+            {
+              "id": "66a1a014-a2e6-420d-be07-7125418254d7",
+              "name": "n_glenstone",
+              "value": "2203388956855958",
+              "type": "string"
+            },
+            {
+              "id": "c2761142-8fbe-4722-baff-4304cbce9cbf",
+              "name": "meta_account_2_name",
+              "value": "SP - North Glenstone",
+              "type": "string"
+            },
+            {
+              "id": "b7c38d2f-922f-4743-a478-397cd30fc428",
+              "name": "n_lindbergh",
+              "value": "2203220086749865",
+              "type": "string"
+            },
+            {
+              "id": "10638925-ec36-44ac-814c-745d316cdc8f",
+              "name": "meta_account_3_name",
+              "value": "CD - Lindbergh",
+              "type": "string"
+            },
+            {
+              "id": "2ed62f9d-5089-4140-b509-9b9d7b068b4c",
+              "name": "las_vegas",
+              "value": "2267056450490613",
+              "type": "string"
+            },
+            {
+              "id": "9aeb46e7-a747-4466-a705-2ae010128774",
+              "name": "meta_account_4_name",
+              "value": "Celebrate Dental - LV",
+              "type": "string"
+            },
+            {
+              "id": "499dd842-f660-4796-882e-7c60063a188f",
+              "name": "olathe",
+              "value": "4175774955998110",
+              "type": "string"
+            },
+            {
+              "id": "f929d66d-d881-4c28-9560-c74989a33b64",
+              "name": "meta_account_5_name",
+              "value": "CD - Olathe",
+              "type": "string"
+            },
+            {
+              "id": "d80ae6c1-680f-49c3-803d-9aaa190c4f06",
+              "name": "san_antonio",
+              "value": "1015442443965530",
+              "type": "string"
+            },
+            {
+              "id": "aeae3436-71e0-48a8-82e8-8ba7d8c51597",
+              "name": "meta_account_6_name",
+              "value": "Celebrate Dental - SA",
+              "type": "string"
+            },
+            {
+              "id": "05500fb9-d9e0-4246-83bf-6600363cdf69",
+              "name": "new_mexico",
+              "value": "515584627540511",
+              "type": "string"
+            },
+            {
+              "id": "201f3545-b7d4-49bd-b9c6-0e1aee5978d6",
+              "name": "meta_account_7_name",
+              "value": "CD - New Mexico",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        1424
+      ],
+      "id": "07b011b9-8584-48dd-8c81-29008e3182a5",
+      "name": "Set Meta Credentials1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ]
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1264,
+        1424
+      ],
+      "id": "d9e4a2ec-982c-4362-a8e1-03027fd1e591",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials1').first().json.meta_api_version }}/{{ $('West Republic - Get Meta Current Q').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials1').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        1616
+      ],
+      "id": "32a0e2bb-aabf-456e-931a-64eaf2b10c5a",
+      "name": "WR - Get Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials1').first().json.meta_api_version }}/{{ $('West Republic - Get Meta Prev Q').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials1').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        2016
+      ],
+      "id": "2cd60617-c024-43e9-970a-81e1c9426192",
+      "name": "WR - Get Meta Report1",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        1616
+      ],
+      "id": "8eeb2769-bb8f-426c-80ed-8fa34ab0db34",
+      "name": "Wait",
+      "webhookId": "bf70067f-489e-4145-92b2-19171a808ac3"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        2016
+      ],
+      "id": "a81b34de-1767-499b-8c7a-26430061b65e",
+      "name": "Wait2",
+      "webhookId": "32a7dc8b-a4ba-4860-963e-024588659eaf"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nreturn data.weekly_metrics.map(row => ({\n  json: {\n    location_id:   row.location_id,\n    location_name: row.location_name,\n    platform:      row.platform,\n    quarter:       row.quarter,\n    year:          row.year,\n    week_start:    row.week_start,\n    spend:         row.spend,\n    impressions:   row.impressions,\n    clicks:        row.clicks,\n    conversions:   Math.round(row.conversions),\n    cpl:           row.cpl,\n    ctr:           row.ctr,\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        768
+      ],
+      "id": "f2324919-65cf-432a-9e8a-3a7aa636f4dd",
+      "name": "Weekly Metrics Formatting"
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json.quarterly_summary;\nreturn [{\n  json: {\n    location_id:            s.location_id,\n    location_name:          s.location_name,\n    platform:               s.platform,\n    quarter:                s.quarter,\n    year:                   s.year,\n    total_spend:            s.total_spend,\n    total_impressions:      s.total_impressions,\n    total_clicks:           s.total_clicks,\n    total_conversions:      Math.round(s.total_conversions),\n    cpl:                    s.cpl,\n    ctr:                    s.ctr,\n    prev_quarter:           s.prev_quarter,\n    prev_year:              s.prev_year,\n    prev_total_spend:       s.prev_total_spend,\n    prev_total_conversions: s.prev_total_conversions != null ? Math.round(s.prev_total_conversions) : null,\n    prev_cpl:               s.prev_cpl,\n    prev_ctr:               s.prev_ctr,\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        992
+      ],
+      "id": "1adcaf5f-8e52-4f40-b2db-c0063f55dc42",
+      "name": "Quarterly Summary Formatting"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst location_name = data.quarterly_summary.location_name;\n\nreturn data.top_campaigns.map(row => ({\n  json: {\n    location_id:   row.location_id,\n    location_name: location_name,        // not in top_campaigns output, pull from summary\n    platform:      row.platform,\n    quarter:       row.quarter,\n    year:          row.year,\n    campaign_id:   row.campaign_id,\n    campaign_name: row.campaign_name,\n    spend:         row.spend,\n    impressions:   row.impressions,\n    clicks:        row.clicks,\n    conversions:   Math.round(row.conversions),\n    cpl:           row.cpl,\n    ctr:           row.ctr,\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        1232
+      ],
+      "id": "4e6673db-0507-4e80-a8b4-bb90d0596155",
+      "name": "Top Campaigns Formatting"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nreturn data.weekly_metrics.map(row => ({\n  json: {\n    location_id:   row.location_id,\n    location_name: row.location_name,\n    platform:      row.platform,\n    quarter:       row.quarter,\n    year:          row.year,\n    week_start:    row.week_start,\n    spend:         row.spend,\n    impressions:   row.impressions,\n    clicks:        row.clicks,\n    conversions:   Math.round(row.conversions),\n    cpl:           row.cpl,\n    ctr:           row.ctr,\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        1616
+      ],
+      "id": "1a88a219-2ce9-4e5c-b4d8-6d7fab2b0c75",
+      "name": "Weekly Metrics Formatting1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const s = $input.first().json.quarterly_summary;\nreturn [{\n  json: {\n    location_id:            s.location_id,\n    location_name:          s.location_name,\n    platform:               s.platform,\n    quarter:                s.quarter,\n    year:                   s.year,\n    total_spend:            s.total_spend,\n    total_impressions:      s.total_impressions,\n    total_clicks:           s.total_clicks,\n    total_conversions:      Math.round(s.total_conversions),\n    cpl:                    s.cpl,\n    ctr:                    s.ctr,\n    prev_quarter:           s.prev_quarter,\n    prev_year:              s.prev_year,\n    prev_total_spend:       s.prev_total_spend,\n    prev_total_conversions: s.prev_total_conversions != null ? Math.round(s.prev_total_conversions) : null,\n    prev_cpl:               s.prev_cpl,\n    prev_ctr:               s.prev_ctr,\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        1840
+      ],
+      "id": "9e346dda-808b-421a-ab18-e732231047e1",
+      "name": "Quarterly Summary Formatting1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst location_name = data.quarterly_summary.location_name;\n\nreturn data.top_campaigns.map(row => ({\n  json: {\n    location_id:   row.location_id,\n    location_name: location_name,        // not in top_campaigns output, pull from summary\n    platform:      row.platform,\n    quarter:       row.quarter,\n    year:          row.year,\n    campaign_id:   row.campaign_id,\n    campaign_name: row.campaign_name,\n    spend:         row.spend,\n    impressions:   row.impressions,\n    clicks:        row.clicks,\n    conversions:   Math.round(row.conversions),\n    cpl:           row.cpl,\n    ctr:           row.ctr,\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        2080
+      ],
+      "id": "b841f9b0-a6d5-4b00-8713-d386f58777b7",
+      "name": "Top Campaigns Formatting1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/weekly_metrics",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1648,
+        768
+      ],
+      "id": "f15f346c-8962-40b8-afff-db5694058efe",
+      "name": "HTTP Request",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/quarterly_summary",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1632,
+        992
+      ],
+      "id": "ade6bc83-3bcb-470a-8d48-e7c54ad68eff",
+      "name": "HTTP Request1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/top_campaigns",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1616,
+        1232
+      ],
+      "id": "fb496b63-9ce3-4fd0-aea8-ab38f77ccf25",
+      "name": "HTTP Request2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/weekly_metrics",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2192,
+        1616
+      ],
+      "id": "4782bdad-e8fe-4b1f-b833-9e8d1744cd8a",
+      "name": "HTTP Request3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/quarterly_summary",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2176,
+        1840
+      ],
+      "id": "d19827d2-d084-4ae3-9425-d1fcc2060782",
+      "name": "HTTP Request4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/top_campaigns",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2160,
+        2080
+      ],
+      "id": "396e9c8d-587d-45a0-b6d5-94591b0e430b",
+      "name": "HTTP Request5",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Springfield - Get Google Current Q": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Aggregate Google Current Q",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Springfield - Get Google Prev Q": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Aggregate Google Prev Q",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Springfield - Aggregate Google Current Q": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Merge Google Quarters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Springfield - Aggregate Google Prev Q": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Merge Google Quarters",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Springfield - Merge Google Quarters": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Format Google for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Get Meta Current Q": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Get Meta Prev Q": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Aggregate Meta Current Q": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Merge Meta Quarters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Aggregate Meta Prev Q": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Merge Meta Quarters",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "West Republic - Merge Meta Quarters": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Format Meta for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Supabase Config": {
+      "main": [
+        [
+          {
+            "node": "Set Meta Credentials1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates1": {
+      "main": [
+        [
+          {
+            "node": "Set Supabase Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Req. Dates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Meta Credentials1": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Get Meta Current Q",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Springfield - Get Google Prev Q",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Springfield - Get Google Current Q",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "West Republic - Get Meta Prev Q",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WR - Get Meta Report1": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Aggregate Meta Prev Q",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WR - Get Meta Report": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Aggregate Meta Current Q",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "WR - Get Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "WR - Get Meta Report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Springfield - Format Google for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Weekly Metrics Formatting",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Quarterly Summary Formatting",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Metrics Formatting": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Format Meta for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Weekly Metrics Formatting1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Quarterly Summary Formatting1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quarterly Summary Formatting": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Metrics Formatting1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quarterly Summary Formatting1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4450656f-6a78-44de-8a59-76afcb1df680",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f03b8919fd05361b5c3eb796ae86ee1bb67c20678554d955a51a056d9b315a4d"
+  },
+  "id": "B6BhbVQqWENjHuwI",
+  "tags": []
+}
