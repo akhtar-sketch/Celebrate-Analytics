@@ -18,15 +18,19 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const supabase = createSupabaseBrowserClient()
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true },
-    })
-
-    if (err) { setError(err.message); setLoading(false); return }
-    setStep('otp')
-    setLoading(false)
+    try {
+      const supabase = createSupabaseBrowserClient()
+      const { error: err } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true },
+      })
+      if (err) { setError(err.message); return }
+      setStep('otp')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to send code. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function handleOtpSubmit(e: FormEvent) {
@@ -34,16 +38,21 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const supabase = createSupabaseBrowserClient()
-    const { error: err } = await supabase.auth.verifyOtp({
-      email,
-      token: otp,
-      type: 'email',
-    })
-
-    if (err) { setError(err.message); setLoading(false); return }
-    router.push('/dashboard/executive')
-    router.refresh()
+    try {
+      const supabase = createSupabaseBrowserClient()
+      const { error: err } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email',
+      })
+      if (err) { setError(err.message); return }
+      router.push('/dashboard/executive')
+      router.refresh()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Verification failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
