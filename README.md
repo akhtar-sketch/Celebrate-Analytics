@@ -1,7 +1,7 @@
 # Celebrate Analytics — n8n Ingestion Workflow
 
 **Active workflow file:** `d:\AI\Reporting System\Celebrate Analytics - Testing.json`
-**Status:** Daily ingestion changes documented and ready to apply; TikTok workflow pattern built and verified
+**Status:** 3 locations fully integrated (San Antonio, Springfield, Las Vegas) — daily ingestion running. 5 remaining locations (Chicago, Austin Main, New Mexico, Kansas City, Austin ED) pending workflow expansion.
 **Purpose:** Daily paid ads data ingestion pipeline for Celebrate Dental and Braces.
 Pulls performance data from Google Ads, Meta Ads, and TikTok Ads every day, stores one row per location × platform × date in Supabase, and makes it available to the Celebrate Analytics dashboard.
 
@@ -22,26 +22,39 @@ Pulls performance data from Google Ads, Meta Ads, and TikTok Ads every day, stor
 
 ---
 
-## n8n Workflow Changes Required (Google + Meta)
+## Integrated Locations (Live)
 
-The existing quarterly test workflow (`Celebrate Analytics - Testing.json`) needs the following changes:
+| Location | Google Ads | Meta Ads | TikTok Ads |
+|---|---|---|---|
+| San Antonio | ✅ | ✅ | ✅ `1759853290066977` |
+| Springfield | ✅ | ✅ (3 accounts) | Pending |
+| Las Vegas | ✅ | ✅ | Pending |
+| Chicago | Pending | Pending | Pending |
+| Austin Main | Pending | Pending | Pending |
+| New Mexico | Pending | Pending | Pending |
+| Kansas City | Pending | Pending | Pending |
+| Austin ED | Pending | Pending | Pending |
 
-### 1. Schedule Trigger
-- Replace the Manual Trigger with a **Schedule Trigger**
-- Run daily at **6:00 AM** (`0 6 * * *`)
+---
 
-### 2. Get Req. Dates node
-Already built and correct for production:
+## n8n Workflow Pattern (Google + Meta)
+
+The daily ingestion workflow uses this pattern per location:
+
+### Schedule Trigger
+- Daily at **6:00 AM** (`0 6 * * *`)
+
+### Get Req. Dates node
+Production (yesterday only):
 ```javascript
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 const d = yesterday.toISOString().split('T')[0];
 return [{ json: { date_from: d, date_to: d } }];
 ```
-For initial **backfill**, temporarily set a longer window (e.g. last 90 days) and run once manually.
+For **backfill**, temporarily set a longer window (e.g. last 90 days) and run once manually.
 
-### 3. Google Ads GAQL query
-Change `segments.week` → `segments.date` in the SELECT:
+### Google Ads GAQL query
 ```sql
 SELECT
   campaign.id,
@@ -54,10 +67,9 @@ SELECT
 FROM campaign
 WHERE segments.date BETWEEN '{date_from}' AND '{date_to}'
 ```
-Each row now represents one **campaign × day** instead of one campaign × week.
+Each row represents one **campaign × day**.
 
-### 4. Meta Ads Insights API
-Change `time_increment=7` → `time_increment=1`:
+### Meta Ads Insights API
 ```
 https://graph.facebook.com/v25.0/act_{account_id}/insights?
   fields=campaign_id,campaign_name,spend,impressions,clicks,actions&
@@ -66,7 +78,7 @@ https://graph.facebook.com/v25.0/act_{account_id}/insights?
   level=campaign
 ```
 
-### 5. Format for Supabase — daily_metrics
+### Format for Supabase — daily_metrics
 ```javascript
 const dailyMap = new Map()
 for (const row of rows) {
@@ -89,7 +101,7 @@ for (const row of rows) {
 // Compute cpl, ctr per row before upsert
 ```
 
-### 6. Format for Supabase — daily_campaigns
+### Format for Supabase — daily_campaigns
 ```javascript
 const campaignRows = rows.map(row => ({
   location_id: locationId,
@@ -107,16 +119,15 @@ const campaignRows = rows.map(row => ({
 }))
 ```
 
-### 7. Supabase Upsert nodes
-| Old table | New table | Conflict columns |
-|---|---|---|
-| `weekly_metrics` | `daily_metrics` | `location_id, platform, date` |
-| `quarterly_summary` | *(removed)* | — |
-| `top_campaigns` | `daily_campaigns` | `location_id, platform, date, campaign_id` |
+### Supabase Upsert nodes
+| Table | Conflict columns |
+|---|---|
+| `daily_metrics` | `location_id, platform, date` |
+| `daily_campaigns` | `location_id, platform, date, campaign_id` |
 
 ---
 
-## TikTok Ads Workflow (Built & Verified)
+## TikTok Ads Workflow (Built & Verified — San Antonio Live)
 
 ### Node pattern
 ```
@@ -151,6 +162,8 @@ Access token: store in **n8n Credentials → Header Auth** (name: `Access-Token`
 | `end_date` | `{{ $('Get Req. Dates').item.json.date_to }}` |
 | `page_size` | `100` |
 | `page` | `1` |
+
+> **IMPORTANT — n8n expression gotcha:** Do NOT prefix date values with `=` (e.g. `=2026-04-01`). The `=` prefix tells n8n to evaluate the value as JavaScript arithmetic: `2026-4-1` → `2021`. Use the expression syntax `{{ ... }}` instead.
 
 > **30-day limit:** TikTok only allows 30-day windows with `stat_time_day`. Production workflow fetches yesterday only (1 day) — no issue. For backfills, use a Code node to chunk into 30-day windows before the HTTP Request.
 
@@ -222,10 +235,6 @@ return $input.all().map(item => {
 })
 ```
 
-### Supabase Upsert nodes
-- `daily_metrics`: conflict columns `location_id,platform,date`
-- `daily_campaigns`: conflict columns `location_id,platform,date,campaign_id`
-
 ---
 
 ## Credentials Security
@@ -251,33 +260,14 @@ Restart n8n after editing `.env`.
 
 ## New User Notification (Google Chat)
 
-When a user verifies their email for the first time, a Supabase database trigger fires and calls an n8n webhook, which sends a `cardsV2` card to Google Chat.
+> **Status:** Dropped temporarily. The original Supabase trigger (`on_user_email_verified`) was using `pg_net` to call an n8n webhook, but `pg_net` was either not installed or the webhook URL was unreachable, causing a `500 database error updating user` error that blocked OTP verification entirely. The trigger was dropped to unblock auth. Re-implement once `pg_net` is confirmed available and the n8n webhook URL is stable.
 
-**Trigger condition:** `email_confirmed_at` transitions from NULL → non-NULL in `auth.users`
-
-**n8n workflow pattern:**
+When re-implemented, the pattern is:
 ```
 Webhook → Code (build cardsV2 card) → HTTP Request → Google Chat webhook URL
 ```
 
-**Code node output:**
-```javascript
-const { user_id, email, verified_at } = $input.first().json
-const date = new Date(verified_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
-return [{ json: { cardsV2: [{ cardId: "user-verified-alert", card: {
-  header: { title: "New User Verified", subtitle: "Assign roles to grant dashboard access" },
-  sections: [
-    { header: "User Details", widgets: [
-      { decoratedText: { topLabel: "Email", text: email } },
-      { decoratedText: { topLabel: "User ID", text: user_id } },
-      { decoratedText: { topLabel: "Verified At", text: date } }
-    ]},
-    { widgets: [{ buttonList: { buttons: [{ text: "Open Supabase SQL Editor",
-      onClick: { openLink: { url: "https://supabase.com/dashboard/project/_/sql/new" } }
-    }]}}]}
-  ]
-}}]}]}
-```
+Trigger condition: `email_confirmed_at` transitions from NULL → non-NULL in `auth.users`
 
 ---
 
@@ -328,14 +318,13 @@ One row per location × platform × campaign × calendar day.
 ## Setup Checklist
 
 ### 1. Supabase — Data Tables
-- [ ] Run `supabase-schema-v2.sql` in Supabase SQL Editor
-- [ ] Copy **Project URL** (Settings → API → Project URL)
-- [ ] Copy **Service Role Key** (Settings → API → service_role key)
-- [ ] Copy **Anon/Public Key** (Settings → API → anon/public key)
+- [x] Run `supabase-schema-v2.sql` in Supabase SQL Editor
+- [x] Copy **Project URL**, **Service Role Key**, **Anon/Public Key**
 
 ### 2. Supabase — Auth Tables
-- [ ] Run `supabase-schema-auth.sql` in Supabase SQL Editor
-- [ ] Configure OTP email template (Authentication → Email Templates)
+- [x] Run `supabase-schema-auth.sql` in Supabase SQL Editor
+- [x] Authentication → Email → **"Confirm email" = OFF** (required for OTP to work on first use)
+- [x] SMTP configured via Brevo (use SMTP key `xsmtpsib-...`, not API key)
 
 ### 3. Environment Variables
 Add to `.env.local` in the Next.js app:
@@ -344,6 +333,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon/public key>
 SUPABASE_SERVICE_ROLE_KEY=<service_role key>
 ```
+> `NEXT_PUBLIC_` vars are **baked into the JS bundle at build time**. If they're missing during `npm run build`, the bundle will throw on first Supabase client initialization. Always ensure `.env.local` is present on the VPS **before** building.
 
 ### 4. First Admin Account
 1. Go to `/login`, enter your email, enter the OTP code
@@ -361,29 +351,19 @@ INSERT INTO user_roles (user_id, role) VALUES ('<uuid>', 'viewer');
 INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-antonio');
 ```
 
-### 6. n8n Workflow Updates (Google + Meta)
-- [ ] Change trigger → Schedule (daily at 6 AM)
-- [ ] Confirm Get Req. Dates outputs yesterday's date
-- [ ] Update Google Ads GAQL: `segments.week` → `segments.date`
-- [ ] Update Meta Ads API: `time_increment=7` → `time_increment=1`
-- [ ] Update format nodes to flat daily rows
-- [ ] Update upsert targets → `daily_metrics` + `daily_campaigns`
-- [ ] Store access tokens in n8n Credentials (not Set nodes)
-- [ ] Run manually with a 90-day backfill to populate history
+### 6. n8n Workflow (to expand to remaining 5 locations)
+- [ ] Duplicate Google branch for: Chicago, Austin Main, New Mexico, Kansas City, Austin ED
+- [ ] Duplicate Meta branch for same locations
+- [ ] Add TikTok branches as TikTok accounts are onboarded for each location
+- [ ] Run 90-day backfill for each new location after adding
 
-### 7. TikTok Ads Workflow
-- [ ] Create n8n Credential → Header Auth → name: `Access-Token`, value: TikTok access token
-- [ ] Add TikTok env vars to n8n `.env`
-- [ ] Build workflow using the pattern documented above
-- [ ] Test with single day, verify rows appear in `daily_metrics` + `daily_campaigns`
-
-### 8. Google Ads
+### 7. Google Ads
 - [ ] Confirm the `googleAdsOAuth2Api` credential is still valid
-- [ ] Developer token: `b7Jj7ADOuQn-eCJnYL9p-g`
+- Developer token: stored in n8n Google Ads OAuth2 credential (do not commit)
 
-### 9. Meta Ads
+### 8. Meta Ads
 - [ ] Refresh access token from Meta Business Manager if needed (expires ~60 days)
-- [ ] Conversion action type: `lead`
+- Conversion action type: `lead`
 
 ---
 
@@ -412,6 +392,8 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 | San Antonio | `san_antonio` | `1015442443965530` | `san-antonio` |
 | New Mexico | `new_mexico` | `515584627540511` | `new-mexico` |
 
+> Springfield has 3 Meta accounts (West Republic, North Glenstone, Lindbergh). All three are aggregated into one Springfield dashboard view. `getAllLocationIds('springfield')` returns all four slugs.
+
 ### TikTok Ads Accounts
 | Location | Advertiser ID | location_id |
 |---|---|---|
@@ -421,8 +403,10 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 
 ## What's Not Built Yet
 
-- **All 8 Google + 7 Meta locations expanded** — current test workflow covers Springfield (Google) + West Republic (Meta) only
-- **TikTok for remaining locations** — San Antonio pattern built; duplicate for other locations as TikTok is added
+- **5 remaining locations** — Chicago, Austin Main, New Mexico, Kansas City, Austin ED need Google + Meta branches added to the workflow
+- **TikTok for remaining locations** — San Antonio pattern is built; duplicate for other locations as TikTok accounts are onboarded
+- **Google Chat new-user notification** — dropped temporarily due to `pg_net`/trigger issue; re-add once pg_net is confirmed available
 - **Error alerting** — add a Google Chat or email notification node if workflow fails mid-run
 - **GA4 integration** — optional web analytics layer (not required for MVP)
 - **FlexBook attribution** — future phase: booked appointment tracking
+- **SEO + Social Media ingestion** — planned; full details in `EXPANSION.md`

@@ -2,21 +2,23 @@
 
 **Company:** Celebrate Dental and Braces
 **Project:** Daily paid ads analytics dashboard replacing Madgicx
-**Last updated:** 2026-05-24
-**Current phase:** Dashboard + Auth + Design System complete — TikTok n8n workflow in progress, Google + Meta changes documented and ready to apply
+**Last updated:** 2026-06-08
+**Current status:** 3 of 8 locations fully integrated and live (San Antonio, Springfield, Las Vegas). Dashboard deployed on VPS. OTP auth working. 5 locations pending n8n expansion. Platform expansion to SEO + Social Media designed and documented.
 
 ---
 
-## What This Project Is
+## READ THIS FIRST — What This Project Is
 
 A fully internal analytics dashboard that:
-- Pulls paid ads data daily from Google Ads, Meta Ads, and TikTok Ads
+- Pulls paid ads data daily from Google Ads, Meta Ads, and TikTok Ads via n8n
 - Stores one row per location × platform × day in Supabase (PostgreSQL)
-- Renders live dashboards per location + one executive view
+- Renders live dashboards per location + one executive view in Next.js 15
 - Supports flexible date ranges: Last 7/14/30/90/365 days, This/Last month, This/Last quarter, custom
-- Replaces Madgicx quarterly reporting with a fully owned Next.js platform
+- Replaces Madgicx quarterly reporting with a fully owned platform
 
 "Report" in this project means a **live analytics dashboard** with KPI cards, trend charts, platform breakdowns, and period-over-period comparisons — not a PDF or slide deck.
+
+**The goal** is eventually one dashboard per location showing Google Ads + Meta Ads + TikTok Ads, plus optional SEO and social media channels. Currently live: San Antonio (Google + Meta + TikTok), Springfield (Google + Meta), Las Vegas (Google + Meta).
 
 ---
 
@@ -25,17 +27,19 @@ A fully internal analytics dashboard that:
 ```
 d:\AI\
 ├── Reporting System\                              ← THIS project root
-│   ├── HANDOFF.md                                 ← this file
+│   ├── HANDOFF.md                                 ← this file (read on context reset)
 │   ├── DESC.md                                    ← project requirements + feature overview
-│   ├── README.md                                  ← n8n workflow guide + setup checklist
+│   ├── README.md                                  ← n8n workflow guide + account IDs + setup checklist
+│   ├── EXPANSION.md                               ← platform expansion plan (SEO + Social Media) — planned only
+│   ├── ISSUE.md                                   ← resolved ChunkLoadError deployment issue (reference)
 │   ├── supabase-schema.sql                        ← v1 schema (archived — do not use)
-│   ├── supabase-schema-v2.sql                     ← v2 data schema (run this)
-│   ├── supabase-schema-auth.sql                   ← auth schema (run this too)
-│   ├── Celebrate Analytics - Testing.json         ← n8n workflow (needs daily ingestion updates)
+│   ├── supabase-schema-v2.sql                     ← v2 data schema (deployed)
+│   ├── supabase-schema-auth.sql                   ← auth schema (deployed)
+│   ├── Celebrate Analytics - Testing.json         ← n8n workflow (covers SA + Springfield + LV)
 │   └── celebrate-analytics\                       ← Next.js 15 dashboard app
 │       ├── package.json
 │       ├── next.config.ts                         ← devIndicators disabled
-│       ├── tailwind.config.ts                     ← custom design tokens (canvas, surface, ink, edge, etc.)
+│       ├── tailwind.config.ts                     ← custom design tokens
 │       ├── .env.local.example                     ← copy → .env.local, fill in 3 Supabase keys
 │       └── src\
 │           ├── types.ts                           ← all shared TypeScript types
@@ -60,11 +64,10 @@ d:\AI\
 │           │   ├── SpendTrendChart.tsx           ← area chart, Google + Meta + TikTok (Recharts)
 │           │   ├── PlatformCards.tsx             ← per-platform card with logo + full metrics
 │           │   ├── PlatformComparisonChart.tsx   ← grouped bar chart, conversions by platform over time
-│           │   ├── TopCampaignsTable.tsx         ← top campaign per platform with platform icon badges
-│           │   └── PlatformBreakdown.tsx         ← legacy table component (unused)
+│           │   └── TopCampaignsTable.tsx         ← top campaign per platform with platform icon badges
 │           └── app\
 │               ├── globals.css                   ← CSS custom property design tokens + ::selection color
-│               ├── icon.png                      ← favicon (orange star — auto-served by Next.js App Router)
+│               ├── icon.png                      ← favicon (orange star)
 │               ├── layout.tsx                    ← root layout: ThemeProvider, Inter font, FOUC script
 │               ├── page.tsx                      ← redirects to /dashboard/executive
 │               ├── login\page.tsx                ← two-step OTP flow (email → 6-digit code)
@@ -91,81 +94,104 @@ d:\AI\
 
 | Layer | Technology | Status |
 |---|---|---|
-| Data ingestion | n8n | TikTok pattern built; Google + Meta changes documented — apply to workflow |
-| Database | Supabase (PostgreSQL) | Live — run `supabase-schema-v2.sql` + `supabase-schema-auth.sql` to migrate |
+| Data ingestion | n8n | 3 locations live; 5 pending expansion |
+| Database | Supabase (PostgreSQL) | Live — v2 schema deployed |
 | Frontend dashboard | Next.js 15 (App Router) | Complete |
-| Authentication | Supabase Auth + `@supabase/ssr` | Complete — OTP (no passwords), RBAC, Google Chat new-user notification |
-| Design system | Tailwind CSS + CSS custom properties | Complete — dark navy + light steel-blue, theme toggle, hover animations |
-| Charts | Recharts | Implemented (AreaChart + BarChart, daily/weekly, theme-aware) |
-| Hosting | Ubuntu VPS (testing) / Vercel (planned) | VPS ready; Vercel when ready to deploy |
+| Authentication | Supabase Auth + `@supabase/ssr` | Complete — OTP (no passwords), RBAC |
+| Design system | Tailwind CSS + CSS custom properties | Complete — dark navy + light steel-blue, theme toggle |
+| Charts | Recharts | Implemented (AreaChart + BarChart) |
+| Hosting | Ubuntu VPS + PM2 | Live; accessible via ngrok tunnel |
 | AI summaries | OpenAI API | Deprioritized — not in MVP |
 
 ---
 
-## Phase Progress
+## What Has Been Achieved (as of 2026-06-08)
 
-### Phase 1 — Database & Data Storage
-- [x] v2 schema designed (`supabase-schema-v2.sql`) — `daily_metrics` + `daily_campaigns`
-- [x] Auth schema designed (`supabase-schema-auth.sql`) — `user_roles` + `user_location_access`
-- [ ] **Pending: run both SQL files in Supabase SQL Editor**
+### Completed
+- [x] Supabase v2 schema deployed (`daily_metrics` + `daily_campaigns` tables)
+- [x] Auth schema deployed (`user_roles` + `user_location_access` tables)
+- [x] Next.js 15 dashboard fully built — all components, charts, KPI cards, executive view
+- [x] OTP authentication — passwordless email code flow, no signup page, RBAC (admin/viewer)
+- [x] Brevo SMTP configured in Supabase for OTP emails (SMTP key, not API key)
+- [x] Dashboard deployed on Ubuntu VPS with PM2; tunneled via ngrok
+- [x] Celebrate Analytics logo (celebrate_analytics_logo_new.png) throughout dashboard
+- [x] Admin logo click → `/dashboard/executive`; hover animation on all cards
+- [x] Design system — deep navy dark mode, healthcare light mode, CSS custom properties
+- [x] Loading skeletons on route transitions
+- [x] n8n daily ingestion workflow — **3 locations fully integrated and live:**
+  - San Antonio: Google Ads + Meta Ads + TikTok Ads
+  - Springfield: Google Ads + Meta Ads (3 Meta accounts aggregated)
+  - Las Vegas: Google Ads + Meta Ads
+- [x] Credentials security — access tokens in n8n Header Auth credentials, IDs in n8n `.env`
+- [x] Platform expansion plan documented in `EXPANSION.md`
 
-### Phase 2 — n8n Ingestion Workflow
-- [x] TikTok Ads HTTP Request node setup verified (San Antonio)
-- [x] TikTok Code transform node (daily_metrics + daily_campaigns split) built and tested
-- [x] Daily ingestion pattern for Google + Meta documented in `README.md`
-- [x] n8n credential security: access tokens in Header Auth credentials, config in `.env`
-- [ ] **Pending: apply daily ingestion changes to Google + Meta workflow**
-- [ ] Expand to all 8 Google + 7 Meta + TikTok locations
-- [ ] Set daily Schedule Trigger (`0 6 * * *`)
-- [ ] Run 90-day backfill manually after workflow is ready
+### Pending / Not Yet Done
+- [ ] Expand n8n workflow to remaining 5 locations: Chicago, Austin Main, New Mexico, Kansas City, Austin ED (Google + Meta for each)
+- [ ] Add TikTok branches to remaining locations as TikTok accounts are onboarded
+- [ ] Google Chat new-user notification (dropped due to pg_net issue — see below)
+- [ ] Custom domain deployment (`analytics.celebratedental.com` → Nginx + Certbot)
+- [ ] Phase 5 expansion: SEO dashboard + Social Media dashboard (see `EXPANSION.md`)
+- [ ] FlexBook attribution (future phase)
 
-### Phase 3 — Dashboard ✅ Complete
-- [x] All components built and styled
-- [x] Daily data architecture — all queries aggregate dynamically from `daily_metrics` + `daily_campaigns`
-- [x] Flexible date filtering — 9 presets + custom range via `?from=&to=` URL params
-- [x] Period-over-period comparison for any date window
-- [x] Chart auto-scales: daily (≤ 90 days) or weekly rollup (> 90 days)
-- [x] x-axis fills all calendar dates with 0 for missing data
-- [x] OTP auth — passwordless email code, RBAC (admin/viewer + location access)
-- [x] Google Chat notification on new user verification (n8n webhook + Supabase trigger)
-- [x] Design system — CSS custom properties, dark/light theme, ThemeProvider, platform logos
-- [x] Smooth hover animations on all cards and section containers
-- [x] Loading skeletons on dashboard route transitions
-- [x] Custom text selection color (translucent orange-yellow)
-- [x] Conversions by Platform chart (replaced Spend by Platform)
-- [x] Top Campaign per Platform (best per platform by conversions → CPL → spend)
-- [x] Celebrate Analytics logo throughout (sidebar, login, pending) — admin logo is clickable
-- [x] Custom favicon (orange star)
+---
 
-### Phase 4 — Attribution (future)
-- [ ] FlexBook appointment tracking
-- [ ] Offline conversion imports
-- [ ] Booked appointment attribution
+## Important Issues & Their Resolutions
+
+### 1. ChunkLoadError on VPS Deployment (RESOLVED)
+**Symptom:** Login page rendered correctly but clicking "Send code" crashed with `ChunkLoadError: Loading chunk failed (400)`.
+**Root cause:** VPS had outdated `login/page.tsx` source — old code compiled to chunk hash `d21ad9eeacb8e936`, new OTP code compiles to a different hash. The webpack runtime embedded the old hash; the old file no longer existed after a clean rebuild.
+**Fix:** `git pull` on VPS → `rm -rf .next` → `npm run build` → `pm2 restart`.
+**Key lesson:** `NEXT_PUBLIC_` env vars are baked at build time. Always ensure `.env.local` exists on VPS **before** `npm run build`. Always `git pull` before rebuilding.
+See `ISSUE.md` for full diagnostic details.
+
+### 2. Supabase "database error updating user" on OTP Verify (RESOLVED)
+**Symptom:** Entering the OTP code returned "database error updating user" error.
+**Root cause:** A custom trigger `on_user_email_verified` on `auth.users` was failing — it tried to use `pg_net` to call an n8n webhook (Google Chat notification), but `pg_net` was not installed or the webhook URL was unreachable.
+**Fix:** Dropped the trigger:
+```sql
+DROP TRIGGER IF EXISTS on_user_email_verified ON auth.users;
+```
+**Status:** Google Chat notification is not currently active. Re-implement once `pg_net` is confirmed available.
+
+### 3. Supabase Sends Confirmation Link Instead of OTP (RESOLVED)
+**Symptom:** First-time OTP login sent a "Confirm your email" link instead of a 6-digit code.
+**Root cause:** Supabase Authentication → Providers → Email → "Confirm email" was ON. For new users, this sends a confirmation link first.
+**Fix:** Supabase dashboard → Authentication → Providers → Email → disable **"Confirm email"**.
+
+### 4. Brevo SMTP — Using Wrong Key Type (RESOLVED)
+**Symptom:** OTP took 20-30 seconds then failed with `{}` error.
+**Fix:** Use the **SMTP key** (`xsmtpsib-...`) from Brevo, not the API key. Username = your Brevo account email.
+
+### 5. TikTok n8n Expression Arithmetic Bug (RESOLVED)
+**Symptom:** TikTok API returned no data; date range was wrong.
+**Root cause:** `start_date` field in n8n had value `=2026-04-01`. The `=` prefix causes n8n to evaluate it as JavaScript arithmetic: `2026 - 4 - 1 = 2021`.
+**Fix:** Use expression syntax `{{ $('Get Req. Dates').item.json.date_from }}` — never prefix a date value with `=`.
 
 ---
 
 ## Auth System
 
-### How It Works (OTP — no passwords)
+### How OTP Login Works
 
 ```
-/login  →  enter email  →  supabase.auth.signInWithOtp()  →  6-digit code sent
+/login  →  enter email  →  supabase.auth.signInWithOtp()  →  6-digit code sent via Brevo SMTP
                                                                       ↓
-                                                          User enters code
+                                                          User enters 6-digit code
                                                                       ↓
                                                      supabase.auth.verifyOtp()
                                                     ├── has role  →  /dashboard/executive
                                                     └── no role   →  /pending
                                                                           ↓
-                                              [Google Chat notification sent to admin]
-                                                                          ↓
-                                              [Admin runs INSERT INTO user_roles ...]
+                                              [Admin runs INSERT INTO user_roles ... in Supabase SQL Editor]
                                                                           ↓
                                               "Check dashboard access"  →  /dashboard/executive
 ```
 
 New users are auto-created by Supabase on first OTP use (`shouldCreateUser: true`).
-The Supabase `email_confirmed_at` trigger fires on first verification — this powers the Google Chat alert.
+
+**Required Supabase settings:**
+- Authentication → Providers → Email → "Confirm email" = **OFF**
+- SMTP → Brevo SMTP key (not API key), Brevo account email as username
 
 ### Role Model
 
@@ -174,84 +200,89 @@ The Supabase `email_confirmed_at` trigger fires on first verification — this p
 | `admin` | ✅ Full access | ✅ All 8 locations | → /dashboard/executive |
 | `viewer` | ❌ Redirected to first assigned location | ✅ Only assigned location_ids | No action |
 
-### Auth Tables
-
-```sql
--- user_roles: one row per user
--- role values: 'admin' | 'viewer'
-SELECT * FROM user_roles;
-
--- user_location_access: one row per viewer × location
-SELECT * FROM user_location_access;
-```
-
 ### Granting Access (Admin SQL)
 
 ```sql
--- Find a user's UUID after they sign in for the first time
+-- Find user UUID after they sign in for the first time
 SELECT id, email, created_at FROM auth.users ORDER BY created_at DESC;
 
--- Grant admin role
+-- Grant admin role (all locations)
 INSERT INTO user_roles (user_id, role) VALUES ('<uuid>', 'admin');
 
 -- Grant viewer role with specific locations
 INSERT INTO user_roles (user_id, role) VALUES ('<uuid>', 'viewer');
-INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'springfield');
+INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-antonio');
 INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'las-vegas');
 ```
 
-### Supabase Email Template
-
-A custom branded OTP email template is configured in **Supabase → Authentication → Email Templates → Magic Link**.
-Shows the Celebrate Analytics logo + 6-digit code in a styled card.
-Logo URL must be a publicly hosted URL (Supabase Storage or production domain).
+### Key Auth Files
+- `src/lib/auth.ts` — `getUserAccess()` — reads `user_roles` + `user_location_access` via service role key
+- `src/lib/supabase-browser.ts` — browser client for `signInWithOtp` + `verifyOtp` + `signOut`
+- `src/lib/supabase-server.ts` — cookie-aware server client for session validation in middleware
+- `src/lib/supabase.ts` — service role client for all data queries (never reaches the browser)
+- `src/middleware.ts` — protects `/dashboard/*` routes, redirects unauthenticated users to `/login`
+- `src/app/login/page.tsx` — two-step OTP form (email → 6-digit code)
+- `src/app/pending/page.tsx` — waiting-for-role screen shown to users with no role assigned
 
 ---
 
-## Design System
+## Database Schema
 
-### Theme Architecture
+### Tables (deployed in Supabase)
 
-- `tailwind.config.ts` — extends Tailwind with semantic token color names
-- `globals.css` — defines CSS custom properties in `:root` (light) and `.dark` (dark); includes `::selection` color (translucent orange-yellow)
-- `ThemeProvider.tsx` — client component managing `class="dark"` on `<html>`, persisted to `localStorage`
-- Root `layout.tsx` — inline `<script>` in `<head>` applies theme before first paint (prevents FOUC)
-
-### Design Tokens
-
-| Token | Dark value | Light value |
-|---|---|---|
-| `bg-canvas` | `#070f1d` deep navy | `#eef4fc` steel blue |
-| `bg-surface` | `#0b1426` navy card | `#ffffff` white |
-| `bg-raised` | `#101b32` elevated | `#f5faff` tinted |
-| `bg-wash` | `#131f39` hover | `#e6f0fc` hover |
-| `border-edge` | `#1a2c4e` | `#c4d6ec` |
-| `border-edge-soft` | `#12203a` | `#d8e6f6` |
-| `text-ink` | `#dce6f8` | `#0b162a` |
-| `text-ink-2` | `#708cb6` | `#415a7a` |
-| `text-ink-3` | `#3a5072` | `#8aa2c0` |
-
-### Platform Colors
-
-| Platform | Logo | Chart color |
-|---|---|---|
-| Google Ads | 4-color G (multicolor SVG) | `#3b82f6` blue-500 |
-| Meta Ads | Facebook f (Meta blue `#1877F2`) | `#f59e0b` amber-500 |
-| TikTok Ads | TikTok note (currentColor) | `#ec4899` pink-500 |
-
-Chart colors are visually distinct by design (not strict brand colors) to be distinguishable side-by-side.
-
-### Hover Animations
-
-All cards and section containers use:
+**`daily_metrics`** — one row per location × platform × day
 ```
-transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg
-dark:hover:shadow-[0_6px_24px_rgba(0,0,0,0.45)]
+location_id, location_name, platform, date, spend, impressions, clicks, conversions, cpl, ctr
+UNIQUE(location_id, platform, date)
 ```
-Platform cards use a stronger lift:
+
+**`daily_campaigns`** — one row per location × platform × campaign × day
 ```
-hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)]
+location_id, location_name, platform, date, campaign_id, campaign_name, spend, impressions, clicks, conversions, cpl, ctr
+UNIQUE(location_id, platform, date, campaign_id)
 ```
+
+**`user_roles`** — one row per user
+```
+user_id (FK → auth.users), role ('admin' | 'viewer')
+UNIQUE(user_id)
+```
+
+**`user_location_access`** — one row per viewer × location (admin ignores this)
+```
+user_id (FK → auth.users), location_id (text slug)
+UNIQUE(user_id, location_id)
+```
+
+All tables have RLS enabled. `user_roles` and `user_location_access` allow no direct client access (service role only). Data tables can be queried via the service role key from server components.
+
+---
+
+## n8n Workflow: Integrated Locations
+
+| Location | Google | Meta | TikTok | Notes |
+|---|---|---|---|---|
+| San Antonio | ✅ `2429608734` | ✅ `1015442443965530` | ✅ `1759853290066977` | All platforms live |
+| Springfield | ✅ `3158644952` | ✅ 3 accounts (see below) | Pending | Meta: West Republic + N. Glenstone + Lindbergh |
+| Las Vegas | ✅ `2391448311` | ✅ `2267056450490613` | Pending | |
+| Chicago | Pending | Pending | Pending | Google: `6276915301` |
+| Austin Main | Pending | Pending | Pending | Google: `2769191567` |
+| New Mexico | Pending | Pending | Pending | Google: `8844673094`, Meta: `515584627540511` |
+| Kansas City | Pending | Pending | Pending | Google: `7480415252`, Meta Olathe: `4175774955998110` |
+| Austin ED | Pending | Pending | Pending | Google: `5412850943` |
+
+Springfield Meta accounts:
+- West Republic: `885038680320071` (slug: `west-republic`)
+- North Glenstone: `2203388956855958` (slug: `north-glenstone`)
+- Lindbergh: `2203220086749865` (slug: `lindbergh`)
+
+The dashboard aggregates all Springfield slugs into one view via `getAllLocationIds('springfield')` in `src/config/locations.ts`.
+
+### n8n Credential Security Rules
+- Access tokens → **n8n Credentials** (Header Auth, encrypted) — never in Set nodes
+- Advertiser IDs, location slugs → **n8n `.env`** (`$env.VAR_NAME`) — never hardcoded in nodes
+- Google Ads OAuth → n8n Credentials (Google Ads OAuth2)
+- Developer token: stored in n8n Google Ads OAuth2 credential (do not commit to git)
 
 ---
 
@@ -263,99 +294,118 @@ URL params: `?from=YYYY-MM-DD&to=YYYY-MM-DD`
 - `DateRangePicker` — 9 presets + custom range, pushes new URL params → server re-renders
 - Previous period: same number of days immediately preceding the selected range
 - Chart granularity: daily if range ≤ 90 days, weekly rollup (Monday-anchored) if > 90 days
-- KPI delta: `(current - prev) / |prev| × 100%`, with green/red color + prior period date shown
+- KPI delta: `(current - prev) / |prev| × 100%`, with green/red color + prior period label
+- x-axis fills all calendar days with 0 for missing platform data
 
 ---
 
-## Key Decisions Made
+## Design System
+
+**Theme architecture:**
+- `tailwind.config.ts` — semantic token color names
+- `globals.css` — CSS custom properties in `:root` (light) + `.dark` (dark); `::selection` = translucent orange-yellow
+- `ThemeProvider.tsx` — manages `class="dark"` on `<html>`, persisted to `localStorage`
+- Root `layout.tsx` — inline `<script>` in `<head>` applies theme before first paint (prevents FOUC)
+
+**Design tokens (key values):**
+
+| Token | Dark | Light |
+|---|---|---|
+| `bg-canvas` | `#070f1d` deep navy | `#eef4fc` steel blue |
+| `bg-surface` | `#0b1426` navy card | `#ffffff` white |
+| `border-edge` | `#1a2c4e` | `#c4d6ec` |
+| `text-ink` | `#dce6f8` | `#0b162a` |
+| `text-ink-2` | `#708cb6` | `#415a7a` |
+| `text-ink-3` | `#3a5072` | `#8aa2c0` |
+
+**Platform chart colors:** Google = blue-500, Meta = amber-500, TikTok = pink-500 (visually distinct, not brand colors)
+
+---
+
+## VPS Deployment
+
+The app is deployed on an Ubuntu VPS using PM2. It is NOT on Vercel yet.
+
+```bash
+# On VPS — standard deployment flow:
+cd ~/celebrate-analytics/celebrate-analytics   # PM2 cwd must be here
+git pull origin main
+rm -rf .next                                    # always clean before rebuild
+npm run build                                   # NEXT_PUBLIC_ vars baked at this step
+pm2 restart celebrate-analytics
+
+# If PM2 process doesn't exist:
+pm2 start npm --name "celebrate-analytics" -- start
+pm2 save
+```
+
+**CRITICAL deployment rules:**
+1. `.env.local` must exist on VPS **before** `npm run build` — `NEXT_PUBLIC_` vars are baked at build time
+2. Always `git pull` before `npm run build` — source/chunk hash mismatch causes ChunkLoadError
+3. Always `rm -rf .next` before rebuilding — prevents stale manifest issues
+4. PM2 must be started from inside the Next.js project dir (not the parent)
+
+**Diagnostic commands:**
+```bash
+# Confirm env vars baked into bundle
+grep -r "supabase.co" .next/static/ | head -3
+
+# Check which chunk hash the server is serving
+curl -s http://localhost:3000/login | grep -o 'page-[a-f0-9]*\.js'
+
+# Check PM2 working directory
+pm2 info celebrate-analytics | grep cwd
+
+# View logs
+pm2 logs celebrate-analytics --lines 50
+```
+
+---
+
+## Platform Expansion Plan (Designed, Not Yet Implemented)
+
+Full details in `EXPANSION.md`. Summary:
+
+**New channels to add:**
+- SEO — Google Search Console per location (clicks, impressions, CTR, avg position)
+- Social Media — Meta Page Insights + TikTok organic per location (reach, engagements, followers)
+
+**New role model:**
+| Role | Paid Ads | SEO | Social | Notes |
+|---|---|---|---|---|
+| `super_admin` | ✅ | ✅ | ✅ | Developer/admin — all channels, all locations |
+| `cmo` | ✅ | ✅ | ✅ | Sees everything |
+| `paid_ads` | ✅ | ❌ | ❌ | Replaces current `admin`/`viewer` |
+| `seo` | ❌ | ✅ | ❌ | All locations, SEO only |
+| `social_media` | ❌ | ❌ | ✅ | All locations, social only |
+
+**New routes:**
+- `/dashboard/paid-ads/executive` and `/dashboard/paid-ads/[location]` (moved from `/dashboard/[location]`)
+- `/dashboard/seo/[location]`
+- `/dashboard/social/[location]`
+
+**New tables:** `daily_seo_metrics`, `daily_social_metrics` (schemas in `EXPANSION.md`)
+
+**Implementation phases:** Phase 1 (auth restructure) → Phase 2 (SEO) → Phase 3 (Social) → Phase 4 (Cross-channel exec view). **Nothing has been implemented yet** — `EXPANSION.md` is a planning document only.
+
+---
+
+## Key Architectural Decisions
 
 | Decision | Rationale |
 |---|---|
-| OTP instead of email+password | Simpler UX, no password management, no signup page — one flow handles both new and returning users |
+| OTP instead of email+password | Simpler UX, no password management, single flow for new + returning users |
 | Daily ingestion instead of weekly snapshots | Enables flexible date ranges without re-engineering the data layer |
 | All aggregation at query time | Dashboard computes any time range dynamically; no pre-aggregation needed |
-| Previous period = same-length window immediately preceding | More flexible than fixed QoQ; works for any date range preset |
-| Weekly chart rollup for ranges > 90 days | Prevents 365-point x-axis from being illegible; auto-switches at 90-day threshold |
-| x-axis fills all calendar days with 0 | Google and Meta have different active days; without fill, platforms share misaligned x-axes |
-| URL params for date range state | Allows deep-linking and bookmarking; server components re-fetch on param change |
-| Service role key server-side only | All data queries run in Server Components — key never reaches the browser |
-| Google Chat alert via n8n + Supabase trigger | Decoupled from app code; fires on `email_confirmed_at` transition regardless of auth method |
-| n8n credentials in Header Auth (not Set nodes) | Access tokens encrypted at rest, never appear in workflow exports or execution logs |
-| TikTok 30-day API limit → daily ingestion | Fetch yesterday only in production; chunk by month for backfills |
-| Two Supabase clients | `supabase-server.ts` (anon key + cookies) for session validation; `supabase.ts` (service role) for data queries |
-| CSS custom properties for design tokens | Single source of truth for both themes; Tailwind references vars via `rgb(var(--token))` syntax |
-| `conversions` as `numeric(10,4)` | Google Ads API returns fractional conversion values (e.g. 123.18) — integer would lose precision |
+| Previous period = same-length window immediately preceding | Works for any date range preset, not just fixed quarter-over-quarter |
+| Weekly chart rollup for ranges > 90 days | Prevents 365-point x-axis from being illegible |
+| x-axis fills all calendar days with 0 | Platforms have different active days; fill ensures aligned multi-platform chart |
+| URL params for date range state | Deep-linking, bookmarking; server components re-fetch on param change |
+| Service role key server-side only | All data queries in Server Components — key never reaches the browser |
+| Two Supabase clients | `supabase-server.ts` (anon + cookies) for session; `supabase.ts` (service role) for data |
+| `conversions` as `numeric(10,4)` | Google Ads returns fractional conversions (e.g. 123.18) |
+| n8n credentials in Header Auth (not Set nodes) | Tokens encrypted at rest; never appear in workflow exports or execution logs |
 | location_id as text slug | Human-readable, consistent across all platforms, easy to type in SQL |
-
----
-
-## Account & Location Mapping
-
-### Google Ads Accounts (8 locations)
-| Location | Customer ID | location_id slug |
-|---|---|---|
-| Springfield | `3158644952` | `springfield` |
-| San Antonio | `2429608734` | `san-antonio` |
-| Las Vegas | `2391448311` | `las-vegas` |
-| Chicago | `6276915301` | `chicago` |
-| Austin Main | `2769191567` | `austin-main` |
-| New Mexico | `8844673094` | `new-mexico` |
-| Kansas City | `7480415252` | `kansas-city` |
-| Austin ED | `5412850943` | `austin-ed` |
-
-### Meta Ads Accounts (7 locations)
-| Location | Variable | Account ID | location_id slug |
-|---|---|---|---|
-| West Republic (Springfield) | `west_republic` | `885038680320071` | `west-republic` |
-| North Glenstone (Springfield) | `n_glenstone` | `2203388956855958` | `north-glenstone` |
-| Lindbergh (Springfield) | `n_lindbergh` | `2203220086749865` | `lindbergh` |
-| Las Vegas | `las_vegas` | `2267056450490613` | `las-vegas` |
-| Olathe (Kansas City) | `olathe` | `4175774955998110` | `olathe` |
-| San Antonio | `san_antonio` | `1015442443965530` | `san-antonio` |
-| New Mexico | `new_mexico` | `515584627540511` | `new-mexico` |
-
-> Springfield has 3 Meta accounts. `getAllLocationIds(location)` returns `['springfield', 'west-republic', 'north-glenstone', 'lindbergh']`. Dashboard queries use `.in('location_id', ids)` to aggregate all four into one Springfield view.
-
-### TikTok Ads Accounts
-| Location | Advertiser ID | location_id slug |
-|---|---|---|
-| San Antonio | `1759853290066977` (campaign: "Lead 1") | `san-antonio` |
-
-> TikTok API limit: max 30-day window per request when using `stat_time_day` dimension. Production workflow fetches yesterday only. Backfills chunk into 30-day windows.
-
----
-
-## Immediate Next Steps (in order)
-
-1. **Run `supabase-schema-v2.sql`** in Supabase SQL Editor → creates `daily_metrics` + `daily_campaigns`, drops v1 tables
-
-2. **Run `supabase-schema-auth.sql`** in Supabase SQL Editor → creates `user_roles` + `user_location_access`
-
-3. **Create `.env.local`** in `celebrate-analytics\` (copy `.env.local.example`, fill in all 3 keys):
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon/public key>
-   SUPABASE_SERVICE_ROLE_KEY=<service_role key>
-   ```
-
-4. **Configure Supabase OTP email template** → Authentication → Email Templates → paste branded HTML template (see DESC.md), set subject to "Your Celebrate Analytics sign-in code"
-
-5. **Start dashboard** → `npm install && npm run dev` → visit http://localhost:3000
-
-6. **Create first admin account**:
-   - Go to `/login`, enter your email, enter the OTP code
-   - You'll land on `/pending` — expected for first-time users
-   - In Supabase SQL Editor: `SELECT id, email FROM auth.users;` to find your UUID
-   - `INSERT INTO user_roles (user_id, role) VALUES ('<your-uuid>', 'admin');`
-   - Click "Check dashboard access" — you're in
-
-7. **Apply n8n daily ingestion changes** → see `README.md` for full change list
-
-8. **Run 90-day backfill** → set date range in workflow, run manually once
-
-9. **Expand n8n to all locations** → duplicate Google branch ×7, Meta branch ×6, TikTok per location
-
-10. **Deploy** → `analytics.celebratedental.com` → Nginx + Let's Encrypt on VPS, or Vercel
 
 ---
 
@@ -363,30 +413,30 @@ URL params: `?from=YYYY-MM-DD&to=YYYY-MM-DD`
 
 ```powershell
 cd "d:\AI\Reporting System\celebrate-analytics"
-# First time: copy .env.local.example → .env.local and fill in Supabase keys
+# First time: copy .env.local.example → .env.local and fill in 3 Supabase keys
 npm install
 npm run dev   # → http://localhost:3000
 ```
 
-## VPS Deployment
-
-```bash
-# Transfer (from Windows Git Bash / WSL):
-rsync -avz --exclude=node_modules --exclude=.next \
-  "/path/to/celebrate-analytics/" user@VPS_IP:/var/www/celebrate-analytics/
-
-# On VPS:
-cd /var/www/celebrate-analytics
-cp .env.local.example .env.local && nano .env.local
-npm install && npm run build
-pm2 start npm --name "celebrate-analytics" -- start
-pm2 save && pm2 startup
+`.env.local` requires:
 ```
-
-Nginx proxies port 80/443 → localhost:3000. Add `server_name analytics.celebratedental.com` + Certbot for SSL.
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon/public key>
+SUPABASE_SERVICE_ROLE_KEY=<service_role key>
+```
 
 ---
 
-## Original Weekly Workflow (do not remove)
+## Immediate Next Steps (Priority Order)
 
-`CD Pulse v1.5 (Production).json` runs every Monday and generates HTML email reports. It is separate from this project and must remain untouched.
+1. **Expand n8n to remaining 5 locations** — duplicate Google + Meta branches for Chicago, Austin Main, New Mexico, Kansas City, Austin ED. Run 90-day backfill per location.
+2. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern.
+3. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
+4. **Deploy to production domain** — `analytics.celebratedental.com` → Nginx + Certbot on VPS (or migrate to Vercel).
+5. **Begin Phase 1 of expansion plan** (when ready) — update role model, restructure routes, update middleware.
+
+---
+
+## Do Not Touch
+
+`d:\AI\n8n\Work\CD - Pulse\CD Pulse v1.5 (Production).json` — this is a separate, unrelated n8n workflow that sends weekly HTML email reports. It is in production and must not be modified.

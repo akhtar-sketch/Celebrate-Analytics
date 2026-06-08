@@ -1,7 +1,7 @@
 # Paid Ads Analytics Dashboard — Celebrate Dental and Braces
 ## Project Overview
 
-> **Implementation status as of 2026-05-24:** Dashboard, auth, and design system complete. TikTok Ads n8n ingestion workflow in progress. Google and Meta ingestion changes documented and ready to apply.
+> **Implementation status as of 2026-06-08:** Dashboard, auth, and design system complete. Marketing data for **3 locations fully integrated** (San Antonio, Springfield, Las Vegas). Remaining 5 locations pending n8n workflow expansion. Platform expansion plan (SEO + Social Media) designed and documented in `EXPANSION.md`.
 
 This project is a custom-built paid advertising analytics dashboard designed to replace the current Madgicx reporting workflow with an internally managed platform.
 
@@ -61,13 +61,13 @@ The design follows a premium dark/light theme with a deep navy dark mode and a c
 ## 1. Automated Data Aggregation
 
 The system pulls data from:
-- Google Ads
-- Meta Ads
-- TikTok Ads (n8n workflow in progress — San Antonio live)
+- **Google Ads** — all 3 integrated locations live
+- **Meta Ads** — all 3 integrated locations live
+- **TikTok Ads** — San Antonio live; other locations to be added as accounts are onboarded
 - GA4 (optional future)
 - FlexBook (future attribution phase)
 
-Data collection is handled using n8n workflows.
+Data collection is handled using n8n workflows. The current workflow covers San Antonio, Springfield, and Las Vegas. The remaining 5 locations (Chicago, Austin Main, New Mexico, Kansas City, Austin ED) need to be added by duplicating the existing workflow branches.
 
 ---
 
@@ -122,13 +122,17 @@ Role-based access control with two roles:
 
 ### Auth Flow (OTP — no passwords)
 1. User visits `/login`, enters their email
-2. Supabase sends a 6-digit one-time code to that email
+2. Supabase sends a 6-digit one-time code via Brevo SMTP
 3. User enters the code → signed in
 4. If no role assigned → lands on `/pending` (awaiting access)
-5. Admin receives a Google Chat notification and runs SQL to assign role
+5. Admin runs SQL to assign role
 6. User clicks "Check dashboard access" → enters their assigned dashboard
 
 New users are created automatically on first OTP use — no separate signup page.
+
+**Supabase settings required:**
+- Authentication → Email → "Confirm email" must be **OFF** (otherwise first-time users receive a confirmation link instead of an OTP)
+- SMTP configured via Brevo (use SMTP key `xsmtpsib-...`, not API key)
 
 ---
 
@@ -157,16 +161,16 @@ Each of the 8 location dashboards shows:
 
 `/dashboard/[location]` — 8 locations:
 
-| Location | slug |
-|---|---|
-| Springfield | `springfield` |
-| San Antonio | `san-antonio` |
-| Las Vegas | `las-vegas` |
-| Chicago | `chicago` |
-| Austin Main | `austin-main` |
-| New Mexico | `new-mexico` |
-| Kansas City | `kansas-city` |
-| Austin ED | `austin-ed` |
+| Location | slug | Data Status |
+|---|---|---|
+| Springfield | `springfield` | ✅ Google + Meta live |
+| San Antonio | `san-antonio` | ✅ Google + Meta + TikTok live |
+| Las Vegas | `las-vegas` | ✅ Google + Meta live |
+| Chicago | `chicago` | Pending |
+| Austin Main | `austin-main` | Pending |
+| New Mexico | `new-mexico` | Pending |
+| Kansas City | `kansas-city` | Pending |
+| Austin ED | `austin-ed` | Pending |
 
 ## Executive Dashboard
 
@@ -178,13 +182,13 @@ Each of the 8 location dashboards shows:
 
 | Layer | Technology | Status |
 |---|---|---|
-| Automation | n8n | Google + Meta changes documented; TikTok workflow in progress |
-| Database | Supabase (PostgreSQL) | Live (v2 schema — run `supabase-schema-v2.sql`) |
+| Automation | n8n | **3 locations live** (SA, Springfield, LV); 5 remaining to add |
+| Database | Supabase (PostgreSQL) | Live (v2 schema) |
 | Frontend Dashboard | Next.js 15 + App Router | Complete |
-| Auth | Supabase Auth + `@supabase/ssr` | Complete — OTP (email code), no passwords, RBAC |
+| Auth | Supabase Auth + `@supabase/ssr` | Complete — OTP (email code), Brevo SMTP, no passwords, RBAC |
 | Design System | Tailwind CSS + CSS custom properties | Complete — dark/light mode, navy palette |
 | Charts | Recharts | Implemented |
-| Hosting | Ubuntu VPS (testing) / Vercel (planned) | VPS ready |
+| Hosting | Ubuntu VPS + PM2 + ngrok | Live on VPS |
 | AI Summaries | OpenAI API | Deprioritized |
 
 ---
@@ -192,27 +196,35 @@ Each of the 8 location dashboards shows:
 # Development Status
 
 ## Phase 1 — Database ✅
-- v2 schema designed (`supabase-schema-v2.sql`) — `daily_metrics` + `daily_campaigns`
-- Auth schema (`supabase-schema-auth.sql`) — `user_roles` + `user_location_access`
+- v2 schema deployed (`supabase-schema-v2.sql`) — `daily_metrics` + `daily_campaigns`
+- Auth schema deployed (`supabase-schema-auth.sql`) — `user_roles` + `user_location_access`
 
-## Phase 2 — n8n Ingestion ⏳
-- Daily ingestion changes fully documented in `README.md`
-- TikTok Ads HTTP Request node + Code transform + Supabase upsert pattern built and verified
-- **Pending:** apply changes to Google + Meta workflow, expand to all 8 locations, run 90-day backfill
+## Phase 2 — n8n Ingestion ⏳ (3 of 8 locations live)
+- ✅ San Antonio — Google Ads + Meta Ads + TikTok Ads
+- ✅ Springfield — Google Ads + Meta Ads (3 Meta accounts: West Republic, North Glenstone, Lindbergh)
+- ✅ Las Vegas — Google Ads + Meta Ads
+- Pending: Chicago, Austin Main, New Mexico, Kansas City, Austin ED (Google + Meta for each)
+- Pending: TikTok for all locations except San Antonio
 
 ## Phase 3 — Dashboard ✅ Complete
 - Next.js 15 app fully built with all components
 - Daily data architecture, flexible date ranges, period-over-period comparison
 - OTP auth: passwordless email code flow, RBAC (admin/viewer + location access)
-- Google Chat notification on new user verification via n8n webhook
 - Design system: deep navy dark mode, healthcare-aesthetic light mode, theme toggle, platform logos
 - Smooth hover animations on all cards and containers
 - Loading skeletons on dashboard route transitions
+- Deployed on Ubuntu VPS with PM2; accessible via ngrok tunnel
 
 ## Phase 4 — Attribution (Future)
 - FlexBook appointment tracking
 - Offline conversion imports
 - Booked appointment attribution
+
+## Phase 5 — Platform Expansion (Planned)
+- SEO analytics (Google Search Console) per location
+- Social media analytics (Meta Page Insights, TikTok organic) per location
+- New roles: `super_admin`, `cmo`, `paid_ads`, `seo`, `social_media`
+- Full details in `EXPANSION.md`
 
 ---
 
@@ -226,3 +238,4 @@ A clean, automated, dashboard-based analytics platform that:
 - Ingests data daily with zero manual work
 - Improves customization and scalability
 - Gives full ownership over marketing reporting infrastructure
+- Eventually expands to cover SEO and organic social performance alongside paid ads

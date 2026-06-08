@@ -24,7 +24,7 @@ export default function LoginPage() {
         email,
         options: { shouldCreateUser: true },
       })
-      if (err) { setError(err.message); return }
+      if (err) { setError(err.message || 'Failed to send code. Please try again.'); return }
       setStep('otp')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to send code. Please try again.')
@@ -45,7 +45,7 @@ export default function LoginPage() {
         token: otp,
         type: 'email',
       })
-      if (err) { setError(err.message); return }
+      if (err) { setError(err.message || 'Verification failed. Please try again.'); return }
       router.push('/dashboard/executive')
       router.refresh()
     } catch (e) {
