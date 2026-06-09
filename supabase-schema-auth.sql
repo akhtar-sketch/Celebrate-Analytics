@@ -54,8 +54,8 @@ CREATE POLICY "no direct access" ON user_location_access FOR ALL USING (false);
 -- ON CONFLICT (user_id, location_id) DO NOTHING;
 
 -- Valid location_id values:
---   springfield, san-antonio, las-vegas, chicago,
---   austin-main, new-mexico, kansas-city, austin-ed
+--   springfield, san-antonio, las-vegas,
+--   austin, new-mexico, kansas-city
 
 -- List all users + roles:
 -- SELECT u.email, r.role, r.created_at

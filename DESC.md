@@ -67,7 +67,7 @@ The system pulls data from:
 - GA4 (optional future)
 - FlexBook (future attribution phase)
 
-Data collection is handled using n8n workflows. The current workflow covers San Antonio, Springfield, and Las Vegas. The remaining 5 locations (Chicago, Austin Main, New Mexico, Kansas City, Austin ED) need to be added by duplicating the existing workflow branches.
+Data collection is handled using n8n workflows. The current workflow covers San Antonio, Springfield, and Las Vegas. The remaining 3 locations (Austin, New Mexico, Kansas City) need to be added by duplicating the existing workflow branches.
 
 ---
 
@@ -138,7 +138,7 @@ New users are created automatically on first OTP use — no separate signup page
 
 ## 5. Location-Level Performance
 
-Each of the 8 location dashboards shows:
+Each of the 6 location dashboards shows:
 - Location-specific spend, leads, CPL, CTR
 - Platform-level breakdown
 - Spend and lead trends
@@ -159,22 +159,20 @@ Each of the 8 location dashboards shows:
 
 ## Location Dashboards
 
-`/dashboard/[location]` — 8 locations:
+`/dashboard/[location]` — 6 locations:
 
 | Location | slug | Data Status |
 |---|---|---|
 | Springfield | `springfield` | ✅ Google + Meta live |
 | San Antonio | `san-antonio` | ✅ Google + Meta + TikTok live |
 | Las Vegas | `las-vegas` | ✅ Google + Meta live |
-| Chicago | `chicago` | Pending |
-| Austin Main | `austin-main` | Pending |
+| Austin | `austin` | Pending |
 | New Mexico | `new-mexico` | Pending |
 | Kansas City | `kansas-city` | Pending |
-| Austin ED | `austin-ed` | Pending |
 
 ## Executive Dashboard
 
-`/dashboard/executive` — admin only.
+`/dashboard/executive` — admin only. Shows all 6 locations.
 
 ---
 
@@ -203,7 +201,7 @@ Each of the 8 location dashboards shows:
 - ✅ San Antonio — Google Ads + Meta Ads + TikTok Ads
 - ✅ Springfield — Google Ads + Meta Ads (3 Meta accounts: West Republic, North Glenstone, Lindbergh)
 - ✅ Las Vegas — Google Ads + Meta Ads
-- Pending: Chicago, Austin Main, New Mexico, Kansas City, Austin ED (Google + Meta for each)
+- Pending: Austin, New Mexico, Kansas City (Google + Meta for each)
 - Pending: TikTok for all locations except San Antonio
 
 ## Phase 3 — Dashboard ✅ Complete

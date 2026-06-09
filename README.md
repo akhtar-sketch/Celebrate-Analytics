@@ -1,7 +1,7 @@
 # Celebrate Analytics — n8n Ingestion Workflow
 
 **Active workflow file:** `d:\AI\Reporting System\Celebrate Analytics - Testing.json`
-**Status:** 3 locations fully integrated (San Antonio, Springfield, Las Vegas) — daily ingestion running. 5 remaining locations (Chicago, Austin Main, New Mexico, Kansas City, Austin ED) pending workflow expansion.
+**Status:** 3 locations fully integrated (San Antonio, Springfield, Las Vegas) — daily ingestion running. 3 remaining locations (Austin, New Mexico, Kansas City) pending workflow expansion.
 **Purpose:** Daily paid ads data ingestion pipeline for Celebrate Dental and Braces.
 Pulls performance data from Google Ads, Meta Ads, and TikTok Ads every day, stores one row per location × platform × date in Supabase, and makes it available to the Celebrate Analytics dashboard.
 
@@ -29,11 +29,9 @@ Pulls performance data from Google Ads, Meta Ads, and TikTok Ads every day, stor
 | San Antonio | ✅ | ✅ | ✅ `1759853290066977` |
 | Springfield | ✅ | ✅ (3 accounts) | Pending |
 | Las Vegas | ✅ | ✅ | Pending |
-| Chicago | Pending | Pending | Pending |
-| Austin Main | Pending | Pending | Pending |
+| Austin | Pending | Pending | Pending |
 | New Mexico | Pending | Pending | Pending |
 | Kansas City | Pending | Pending | Pending |
-| Austin ED | Pending | Pending | Pending |
 
 ---
 
@@ -352,7 +350,7 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 ```
 
 ### 6. n8n Workflow (to expand to remaining 5 locations)
-- [ ] Duplicate Google branch for: Chicago, Austin Main, New Mexico, Kansas City, Austin ED
+- [ ] Duplicate Google branch for: Austin, New Mexico, Kansas City
 - [ ] Duplicate Meta branch for same locations
 - [ ] Add TikTok branches as TikTok accounts are onboarded for each location
 - [ ] Run 90-day backfill for each new location after adding
@@ -375,11 +373,9 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 | Springfield | `3158644952` | `springfield` |
 | San Antonio | `2429608734` | `san-antonio` |
 | Las Vegas | `2391448311` | `las-vegas` |
-| Chicago | `6276915301` | `chicago` |
-| Austin Main | `2769191567` | `austin-main` |
+| Austin | `2769191567` | `austin` |
 | New Mexico | `8844673094` | `new-mexico` |
 | Kansas City | `7480415252` | `kansas-city` |
-| Austin ED | `5412850943` | `austin-ed` |
 
 ### Meta Ads Accounts (7 locations)
 | Location | Variable | Account ID | location_id |
@@ -403,7 +399,7 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 
 ## What's Not Built Yet
 
-- **5 remaining locations** — Chicago, Austin Main, New Mexico, Kansas City, Austin ED need Google + Meta branches added to the workflow
+- **3 remaining locations** — Austin, New Mexico, Kansas City need Google + Meta branches added to the workflow
 - **TikTok for remaining locations** — San Antonio pattern is built; duplicate for other locations as TikTok accounts are onboarded
 - **Google Chat new-user notification** — dropped temporarily due to `pg_net`/trigger issue; re-add once pg_net is confirmed available
 - **Error alerting** — add a Google Chat or email notification node if workflow fails mid-run

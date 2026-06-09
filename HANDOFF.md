@@ -3,7 +3,7 @@
 **Company:** Celebrate Dental and Braces
 **Project:** Daily paid ads analytics dashboard replacing Madgicx
 **Last updated:** 2026-06-08
-**Current status:** 3 of 8 locations fully integrated and live (San Antonio, Springfield, Las Vegas). Dashboard deployed on VPS. OTP auth working. 5 locations pending n8n expansion. Platform expansion to SEO + Social Media designed and documented.
+**Current status:** 3 of 6 locations fully integrated and live (San Antonio, Springfield, Las Vegas). Dashboard deployed on VPS. OTP auth working. 3 locations pending n8n expansion (Austin, New Mexico, Kansas City). Platform expansion to SEO + Social Media designed and documented.
 
 ---
 
@@ -45,7 +45,7 @@ d:\AI\
 │           ├── types.ts                           ← all shared TypeScript types
 │           ├── middleware.ts                      ← route protection, session refresh
 │           ├── config\
-│           │   └── locations.ts                  ← 8 locations + Google/Meta/TikTok ID mapping
+│           │   └── locations.ts                  ← 6 locations + Google/Meta/TikTok ID mapping
 │           ├── lib\
 │           │   ├── supabase.ts                   ← service role client (server-side data queries)
 │           │   ├── supabase-server.ts            ← cookie-aware server client (session validation)
@@ -126,7 +126,7 @@ d:\AI\
 - [x] Platform expansion plan documented in `EXPANSION.md`
 
 ### Pending / Not Yet Done
-- [ ] Expand n8n workflow to remaining 5 locations: Chicago, Austin Main, New Mexico, Kansas City, Austin ED (Google + Meta for each)
+- [ ] Expand n8n workflow to remaining 3 locations: Austin, New Mexico, Kansas City (Google + Meta for each)
 - [ ] Add TikTok branches to remaining locations as TikTok accounts are onboarded
 - [ ] Google Chat new-user notification (dropped due to pg_net issue — see below)
 - [ ] Custom domain deployment (`analytics.celebratedental.com` → Nginx + Certbot)
@@ -197,7 +197,7 @@ New users are auto-created by Supabase on first OTP use (`shouldCreateUser: true
 
 | Role | Executive dashboard | Location dashboards | Logo click |
 |---|---|---|---|
-| `admin` | ✅ Full access | ✅ All 8 locations | → /dashboard/executive |
+| `admin` | ✅ Full access | ✅ All 6 locations | → /dashboard/executive |
 | `viewer` | ❌ Redirected to first assigned location | ✅ Only assigned location_ids | No action |
 
 ### Granting Access (Admin SQL)
@@ -265,11 +265,9 @@ All tables have RLS enabled. `user_roles` and `user_location_access` allow no di
 | San Antonio | ✅ `2429608734` | ✅ `1015442443965530` | ✅ `1759853290066977` | All platforms live |
 | Springfield | ✅ `3158644952` | ✅ 3 accounts (see below) | Pending | Meta: West Republic + N. Glenstone + Lindbergh |
 | Las Vegas | ✅ `2391448311` | ✅ `2267056450490613` | Pending | |
-| Chicago | Pending | Pending | Pending | Google: `6276915301` |
-| Austin Main | Pending | Pending | Pending | Google: `2769191567` |
+| Austin | Pending | Pending | Pending | Google: `2769191567` |
 | New Mexico | Pending | Pending | Pending | Google: `8844673094`, Meta: `515584627540511` |
 | Kansas City | Pending | Pending | Pending | Google: `7480415252`, Meta Olathe: `4175774955998110` |
-| Austin ED | Pending | Pending | Pending | Google: `5412850943` |
 
 Springfield Meta accounts:
 - West Republic: `885038680320071` (slug: `west-republic`)
@@ -429,7 +427,7 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role key>
 
 ## Immediate Next Steps (Priority Order)
 
-1. **Expand n8n to remaining 5 locations** — duplicate Google + Meta branches for Chicago, Austin Main, New Mexico, Kansas City, Austin ED. Run 90-day backfill per location.
+1. **Expand n8n to remaining 3 locations** — duplicate Google + Meta branches for Austin, New Mexico, Kansas City. Run 90-day backfill per location.
 2. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern.
 3. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
 4. **Deploy to production domain** — `analytics.celebratedental.com` → Nginx + Certbot on VPS (or migrate to Vercel).

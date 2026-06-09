@@ -20,15 +20,9 @@ export const LOCATIONS: LocationConfig[] = [
     metaLocationIds: ['las-vegas'],
   },
   {
-    id: 'chicago',
-    name: 'Chicago',
-    googleLocationId: 'chicago',
-    metaLocationIds: [],
-  },
-  {
-    id: 'austin-main',
-    name: 'Austin Main',
-    googleLocationId: 'austin-main',
+    id: 'austin',
+    name: 'Austin',
+    googleLocationId: 'austin',
     metaLocationIds: [],
   },
   {
@@ -42,12 +36,6 @@ export const LOCATIONS: LocationConfig[] = [
     name: 'Kansas City',
     googleLocationId: 'kansas-city',
     metaLocationIds: ['olathe'],
-  },
-  {
-    id: 'austin-ed',
-    name: 'Austin ED',
-    googleLocationId: 'austin-ed',
-    metaLocationIds: [],
   },
 ]
 

@@ -88,19 +88,16 @@ PAID ADS               (visible to: super_admin, cmo, paid_ads)
   Executive
   San Antonio
   Las Vegas
-  Chicago
   ...
 
 SEO                    (visible to: super_admin, cmo, seo)
   San Antonio
   Las Vegas
-  Chicago
   ...
 
 SOCIAL MEDIA           (visible to: super_admin, cmo, social_media)
   San Antonio
   Las Vegas
-  Chicago
   ...
 ```
 
