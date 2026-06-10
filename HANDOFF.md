@@ -2,8 +2,8 @@
 
 **Company:** Celebrate Dental and Braces
 **Project:** Daily paid ads analytics dashboard replacing Madgicx
-**Last updated:** 2026-06-08
-**Current status:** 3 of 6 locations fully integrated and live (San Antonio, Springfield, Las Vegas). Dashboard deployed on VPS. OTP auth working. 3 locations pending n8n expansion (Austin, New Mexico, Kansas City). Platform expansion to SEO + Social Media designed and documented.
+**Last updated:** 2026-06-10
+**Current status:** 3 of 6 locations fully integrated and live (San Antonio, Springfield, Las Vegas). Dashboard deployed on Vercel (celebrate-analytics.vercel.app). OTP auth working. 3 locations pending n8n expansion (Austin, New Mexico, Kansas City). Platform expansion to SEO + Social Media designed and documented.
 
 ---
 
@@ -94,18 +94,18 @@ d:\AI\
 
 | Layer | Technology | Status |
 |---|---|---|
-| Data ingestion | n8n | 3 locations live; 5 pending expansion |
+| Data ingestion | n8n | 3 locations live; 3 pending expansion; timezone: America/Chicago |
 | Database | Supabase (PostgreSQL) | Live — v2 schema deployed |
 | Frontend dashboard | Next.js 15 (App Router) | Complete |
 | Authentication | Supabase Auth + `@supabase/ssr` | Complete — OTP (no passwords), RBAC |
 | Design system | Tailwind CSS + CSS custom properties | Complete — dark navy + light steel-blue, theme toggle |
 | Charts | Recharts | Implemented (AreaChart + BarChart) |
-| Hosting | Ubuntu VPS + PM2 | Live; accessible via ngrok tunnel |
+| Hosting | Vercel | Live (celebrate-analytics.vercel.app); root dir: `celebrate-analytics` |
 | AI summaries | OpenAI API | Deprioritized — not in MVP |
 
 ---
 
-## What Has Been Achieved (as of 2026-06-08)
+## What Has Been Achieved (as of 2026-06-10)
 
 ### Completed
 - [x] Supabase v2 schema deployed (`daily_metrics` + `daily_campaigns` tables)
@@ -113,7 +113,7 @@ d:\AI\
 - [x] Next.js 15 dashboard fully built — all components, charts, KPI cards, executive view
 - [x] OTP authentication — passwordless email code flow, no signup page, RBAC (admin/viewer)
 - [x] Brevo SMTP configured in Supabase for OTP emails (SMTP key, not API key)
-- [x] Dashboard deployed on Ubuntu VPS with PM2; tunneled via ngrok
+- [x] Dashboard deployed on Vercel (celebrate-analytics.vercel.app); root directory set to `celebrate-analytics`
 - [x] Celebrate Analytics logo (celebrate_analytics_logo_new.png) throughout dashboard
 - [x] Admin logo click → `/dashboard/executive`; hover animation on all cards
 - [x] Design system — deep navy dark mode, healthcare light mode, CSS custom properties
@@ -129,7 +129,7 @@ d:\AI\
 - [ ] Expand n8n workflow to remaining 3 locations: Austin, New Mexico, Kansas City (Google + Meta for each)
 - [ ] Add TikTok branches to remaining locations as TikTok accounts are onboarded
 - [ ] Google Chat new-user notification (dropped due to pg_net issue — see below)
-- [ ] Custom domain deployment (`analytics.celebratedental.com` → Nginx + Certbot)
+- [ ] Custom domain (`analytics.celebratedental.com`) → add in Vercel Project Settings → Domains
 - [ ] Phase 5 expansion: SEO dashboard + Social Media dashboard (see `EXPANSION.md`)
 - [ ] FlexBook attribution (future phase)
 
@@ -276,6 +276,10 @@ Springfield Meta accounts:
 
 The dashboard aggregates all Springfield slugs into one view via `getAllLocationIds('springfield')` in `src/config/locations.ts`.
 
+### n8n Workflow Settings
+- **Timezone:** `America/Chicago` (Central Time — covers SA, Springfield, Kansas City; handles CST/CDT automatically)
+- **Schedule:** daily at 6:00 AM Central (`0 6 * * *`)
+
 ### n8n Credential Security Rules
 - Access tokens → **n8n Credentials** (Header Auth, encrypted) — never in Set nodes
 - Advertiser IDs, location slugs → **n8n `.env`** (`$env.VAR_NAME`) — never hardcoded in nodes
@@ -320,43 +324,34 @@ URL params: `?from=YYYY-MM-DD&to=YYYY-MM-DD`
 
 ---
 
-## VPS Deployment
+## Vercel Deployment
 
-The app is deployed on an Ubuntu VPS using PM2. It is NOT on Vercel yet.
+The app is deployed on Vercel at `celebrate-analytics.vercel.app`.
 
-```bash
-# On VPS — standard deployment flow:
-cd ~/celebrate-analytics/celebrate-analytics   # PM2 cwd must be here
-git pull origin main
-rm -rf .next                                    # always clean before rebuild
-npm run build                                   # NEXT_PUBLIC_ vars baked at this step
-pm2 restart celebrate-analytics
+**Vercel project settings:**
+- **Root Directory:** `celebrate-analytics` (the Next.js app is a subdirectory of the repo)
+- **Framework Preset:** Next.js
+- **Build Command:** `next build` (default)
+- **Output Directory:** `.next` (default)
 
-# If PM2 process doesn't exist:
-pm2 start npm --name "celebrate-analytics" -- start
-pm2 save
+**Environment variables set in Vercel → Project Settings → Environment Variables:**
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
 ```
 
-**CRITICAL deployment rules:**
-1. `.env.local` must exist on VPS **before** `npm run build` — `NEXT_PUBLIC_` vars are baked at build time
-2. Always `git pull` before `npm run build` — source/chunk hash mismatch causes ChunkLoadError
-3. Always `rm -rf .next` before rebuilding — prevents stale manifest issues
-4. PM2 must be started from inside the Next.js project dir (not the parent)
+**Deployments are automatic** — every push to `main` triggers a redeploy. No manual build steps needed.
 
-**Diagnostic commands:**
-```bash
-# Confirm env vars baked into bundle
-grep -r "supabase.co" .next/static/ | head -3
+**Supabase URL config (required for OTP redirect):**
+- Authentication → URL Configuration → Site URL: `https://celebrate-analytics.vercel.app`
+- Redirect URLs: `https://celebrate-analytics.vercel.app/**`
+- When a custom domain is added, update both of these to the new domain
 
-# Check which chunk hash the server is serving
-curl -s http://localhost:3000/login | grep -o 'page-[a-f0-9]*\.js'
-
-# Check PM2 working directory
-pm2 info celebrate-analytics | grep cwd
-
-# View logs
-pm2 logs celebrate-analytics --lines 50
-```
+**Custom domain:**
+- Add `analytics.celebratedental.com` in Vercel → Project Settings → Domains
+- Point a CNAME record at Vercel's DNS target (shown in Vercel after adding the domain)
+- After adding, update Site URL + Redirect URLs in Supabase
 
 ---
 
@@ -430,7 +425,7 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role key>
 1. **Expand n8n to remaining 3 locations** — duplicate Google + Meta branches for Austin, New Mexico, Kansas City. Run 90-day backfill per location.
 2. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern.
 3. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
-4. **Deploy to production domain** — `analytics.celebratedental.com` → Nginx + Certbot on VPS (or migrate to Vercel).
+4. **Add custom domain** — `analytics.celebratedental.com` → Vercel Project Settings → Domains → CNAME to Vercel; update Supabase Site URL + Redirect URLs.
 5. **Begin Phase 1 of expansion plan** (when ready) — update role model, restructure routes, update middleware.
 
 ---

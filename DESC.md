@@ -1,7 +1,7 @@
 # Paid Ads Analytics Dashboard — Celebrate Dental and Braces
 ## Project Overview
 
-> **Implementation status as of 2026-06-08:** Dashboard, auth, and design system complete. Marketing data for **3 locations fully integrated** (San Antonio, Springfield, Las Vegas). Remaining 5 locations pending n8n workflow expansion. Platform expansion plan (SEO + Social Media) designed and documented in `EXPANSION.md`.
+> **Implementation status as of 2026-06-10:** Dashboard, auth, and design system complete. Marketing data for **3 locations fully integrated** (San Antonio, Springfield, Las Vegas). Remaining 3 locations pending n8n workflow expansion (Austin, New Mexico, Kansas City). Platform expansion plan (SEO + Social Media) designed and documented in `EXPANSION.md`.
 
 This project is a custom-built paid advertising analytics dashboard designed to replace the current Madgicx reporting workflow with an internally managed platform.
 
@@ -117,7 +117,7 @@ Each location dashboard includes:
 
 Role-based access control with two roles:
 
-- **admin** — accesses all 8 locations + executive dashboard
+- **admin** — accesses all 6 locations + executive dashboard
 - **viewer** — accesses only assigned location dashboards
 
 ### Auth Flow (OTP — no passwords)
@@ -180,13 +180,13 @@ Each of the 6 location dashboards shows:
 
 | Layer | Technology | Status |
 |---|---|---|
-| Automation | n8n | **3 locations live** (SA, Springfield, LV); 5 remaining to add |
+| Automation | n8n | **3 locations live** (SA, Springfield, LV); 3 remaining to add |
 | Database | Supabase (PostgreSQL) | Live (v2 schema) |
 | Frontend Dashboard | Next.js 15 + App Router | Complete |
 | Auth | Supabase Auth + `@supabase/ssr` | Complete — OTP (email code), Brevo SMTP, no passwords, RBAC |
 | Design System | Tailwind CSS + CSS custom properties | Complete — dark/light mode, navy palette |
 | Charts | Recharts | Implemented |
-| Hosting | Ubuntu VPS + PM2 + ngrok | Live on VPS |
+| Hosting | Vercel | Deploying (celebrate-analytics.vercel.app) |
 | AI Summaries | OpenAI API | Deprioritized |
 
 ---
@@ -197,7 +197,7 @@ Each of the 6 location dashboards shows:
 - v2 schema deployed (`supabase-schema-v2.sql`) — `daily_metrics` + `daily_campaigns`
 - Auth schema deployed (`supabase-schema-auth.sql`) — `user_roles` + `user_location_access`
 
-## Phase 2 — n8n Ingestion ⏳ (3 of 8 locations live)
+## Phase 2 — n8n Ingestion ⏳ (3 of 6 locations live)
 - ✅ San Antonio — Google Ads + Meta Ads + TikTok Ads
 - ✅ Springfield — Google Ads + Meta Ads (3 Meta accounts: West Republic, North Glenstone, Lindbergh)
 - ✅ Las Vegas — Google Ads + Meta Ads
@@ -211,7 +211,7 @@ Each of the 6 location dashboards shows:
 - Design system: deep navy dark mode, healthcare-aesthetic light mode, theme toggle, platform logos
 - Smooth hover animations on all cards and containers
 - Loading skeletons on dashboard route transitions
-- Deployed on Ubuntu VPS with PM2; accessible via ngrok tunnel
+- Deployed on Vercel (celebrate-analytics.vercel.app)
 
 ## Phase 4 — Attribution (Future)
 - FlexBook appointment tracking

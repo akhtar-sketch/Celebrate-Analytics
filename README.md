@@ -41,6 +41,7 @@ The daily ingestion workflow uses this pattern per location:
 
 ### Schedule Trigger
 - Daily at **6:00 AM** (`0 6 * * *`)
+- **Timezone: `America/Chicago`** (Central Time — covers the majority of locations; handles CST/CDT automatically)
 
 ### Get Req. Dates node
 Production (yesterday only):
@@ -331,7 +332,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon/public key>
 SUPABASE_SERVICE_ROLE_KEY=<service_role key>
 ```
-> `NEXT_PUBLIC_` vars are **baked into the JS bundle at build time**. If they're missing during `npm run build`, the bundle will throw on first Supabase client initialization. Always ensure `.env.local` is present on the VPS **before** building.
+> `NEXT_PUBLIC_` vars are **baked into the JS bundle at build time**. On Vercel, set these in Project Settings → Environment Variables before deploying. For local dev, add to `.env.local`.
 
 ### 4. First Admin Account
 1. Go to `/login`, enter your email, enter the OTP code
@@ -349,7 +350,7 @@ INSERT INTO user_roles (user_id, role) VALUES ('<uuid>', 'viewer');
 INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-antonio');
 ```
 
-### 6. n8n Workflow (to expand to remaining 5 locations)
+### 6. n8n Workflow (to expand to remaining 3 locations)
 - [ ] Duplicate Google branch for: Austin, New Mexico, Kansas City
 - [ ] Duplicate Meta branch for same locations
 - [ ] Add TikTok branches as TikTok accounts are onboarded for each location
@@ -367,7 +368,7 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 
 ## Account & Location Mapping
 
-### Google Ads Accounts (8 locations)
+### Google Ads Accounts (6 locations)
 | Location | Customer ID | location_id |
 |---|---|---|
 | Springfield | `3158644952` | `springfield` |
@@ -377,7 +378,7 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 | New Mexico | `8844673094` | `new-mexico` |
 | Kansas City | `7480415252` | `kansas-city` |
 
-### Meta Ads Accounts (7 locations)
+### Meta Ads Accounts (7 accounts across 5 locations)
 | Location | Variable | Account ID | location_id |
 |---|---|---|---|
 | West Republic (Springfield) | `west_republic` | `885038680320071` | `west-republic` |

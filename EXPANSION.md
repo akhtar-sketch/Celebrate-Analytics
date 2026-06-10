@@ -2,7 +2,7 @@
 
 **Status:** Planned — not yet implemented
 **Scope:** Expand beyond paid ads into SEO and social media analytics, with a granular role-based access system
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-10
 
 ---
 
@@ -28,7 +28,7 @@ The current system covers paid advertising analytics (Google Ads, Meta Ads, TikT
 - `super_admin` is for the developer/admin — sees everything across all channels and locations for debugging and testing
 - `cmo` sees everything — all channels, all locations, executive view
 - `paid_ads` replaces the old `admin` (all locations) and `viewer` (assigned locations) — the `user_location_access` table still applies to this role only
-- `seo` and `social_media` always see all 8 locations within their channel — no location restriction needed
+- `seo` and `social_media` always see all 6 locations within their channel — no location restriction needed
 - The old `admin` and `viewer` roles are retired when this is implemented
 
 ### Mapping from old roles
@@ -313,7 +313,7 @@ One layout per channel (or a shared layout with channel-aware access check). Eac
 
 ### Phase 2 — SEO Dashboard
 - Run schema migration to create `daily_seo_metrics`
-- Set up Google Search Console access for all 8 locations
+- Set up Google Search Console access for all 6 locations
 - Build n8n SEO ingestion branch
 - Build `/dashboard/seo/[location]` page with:
   - KPI band: clicks, impressions, CTR, avg position
