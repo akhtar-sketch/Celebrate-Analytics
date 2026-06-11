@@ -1,0 +1,798 @@
+{
+  "name": "Celebrate Analytics - Las Vegas Region",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sb-0001",
+              "name": "supabase_url",
+              "value": "https://jadmrftsvtklvgvsonoo.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "sb-0002",
+              "name": "supabase_service_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI3MzE4MCwiZXhwIjoyMDk0ODQ5MTgwfQ.zu9dOTIhkSNO0fbdQTN7f-F0OFYI8-1RXyvcZNYEYdU",
+              "type": "string"
+            },
+            {
+              "id": "sb-0003",
+              "name": "supabase_anon_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzMxODAsImV4cCI6MjA5NDg0OTE4MH0.gjpbPb96aVW2tfiWA7Nw917fJQERyckIyGUKmvQft8U",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -832,
+        1424
+      ],
+      "id": "6adfceb3-9280-41bb-ad31-39acc925f52c",
+      "name": "Set Supabase Config"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1264,
+        1424
+      ],
+      "id": "a7f0d398-73fa-4c33-b70d-4f844c215dc2",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        1728
+      ],
+      "id": "4d5c1b51-7474-469f-a3d3-d758adfe5b26",
+      "name": "Wait",
+      "webhookId": "d0f76269-4b4d-42ec-bdca-36d353879a52"
+    },
+    {
+      "parameters": {
+        "jsCode": "const yesterday = new Date();\nyesterday.setDate(yesterday.getDate() - 1);\nconst d = yesterday.toISOString().split('T')[0];\n\nreturn [{ json: { date_from: d, date_to: d } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1072,
+        1424
+      ],
+      "id": "ed3f5f83-66be-4874-bbde-bb36fff916a2",
+      "name": "Get Req. Dates"
+    },
+    {
+      "parameters": {
+        "jsCode": "const to = new Date();\nto.setDate(to.getDate() - 1);\nconst from = new Date(to);\nfrom.setDate(from.getDate() - 89);\n\nreturn [{\n  json: {\n    date_from: from.toISOString().split('T')[0],\n    date_to:   to.toISOString().split('T')[0]\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1104,
+        1712
+      ],
+      "id": "18222681-795b-46a9-a038-2e8251e367f0",
+      "name": "Get Req. Dates (Temp Testing)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        1520
+      ],
+      "id": "5dbf783f-1ae0-4948-b0a9-58e34a6194c7",
+      "name": "Daily Metrics Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        1872
+      ],
+      "id": "cbdcded6-0924-4562-ad4d-02ec9c9d67f4",
+      "name": "Top Campaigns Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "meta_access_token",
+              "value": "EAAEAq6mB210BRbiOEdZBSX7um26ZCEHuBRCEBqO5n6VrPQZAi0tx5zDhIZByLcfANhZBZAwZAZBXU8GNBliBGQxpTKqF6wQ1vkERPg44zgZAzsFrZAGQrkwvcNoK3naV317Ni0gQOSMgmCTdFp7sxzOjHch1Ru4Skrc0c2wrHJ8GdvGQZCvRPMU4zJPC7KAmEz7q1rZBhAZDZD",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "meta_api_version",
+              "value": "v25.0",
+              "type": "string"
+            },
+            {
+              "id": "757ba073-039a-48e3-a844-413016190d19",
+              "name": "meta_conversion_action_types",
+              "value": "lead",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "las_vegas",
+              "value": "2267056450490613",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "meta_account_1_name",
+              "value": "Celebrate Dental Las Vegas",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        1424
+      ],
+      "id": "ce37bdbe-e151-46b4-b42d-3b1ef0e3c44d",
+      "name": "Set Meta Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        912
+      ],
+      "id": "7394bef4-64d5-48b4-b59e-e88f56ba8032",
+      "name": "Daily Metrics Formatting (Google)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        1184
+      ],
+      "id": "862cc1ee-c537-4f3a-a054-d92cf919f6de",
+      "name": "Top Campaigns Formatting (Google)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "developer_token",
+              "value": "b7Jj7ADOuQn-eCJnYL9p-g",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "google_api_version",
+              "value": "v20",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "customer_id",
+              "value": "2391448311",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "google_account_1_name",
+              "value": "Celebrate Dental Las Vegas",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -464,
+        1424
+      ],
+      "id": "7b2156e6-7a84-4798-a3fd-93663c7c0df6",
+      "name": "Set Google Config"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/{{ $json.google_api_version }}/customers/{{ $json.customer_id }}/googleAds:search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleAdsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "developer-token",
+              "value": "={{ $json.developer_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  query: `\n    SELECT\n      customer.id,\n      customer.descriptive_name,\n      campaign.id,\n      campaign.name,\n      segments.date,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.cost_micros,\n      metrics.conversions\n    FROM campaign\n    WHERE segments.date BETWEEN '${$('Get Req. Dates').first().json.date_from}'\n      AND '${$('Get Req. Dates').first().json.date_to}'\n  `\n}\n}}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        80,
+        1056
+      ],
+      "id": "8d842da4-2b0a-4857-9e96-4fedc9888390",
+      "name": "LV - Get Google",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "googleAdsOAuth2Api": {
+          "id": "OHWAGJdokBHrnA3Z",
+          "name": "Google Ads account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = items[0].json.results || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of results) {\n  const date  = r.segments?.date || 'unknown';\n  const cost  = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr  = Number(r.metrics?.impressions || 0);\n  const clks  = Number(r.metrics?.clicks || 0);\n  const conv  = Number(r.metrics?.conversions || 0);\n  const cId   = String(r.campaign?.id || '');\n  const cName = r.campaign?.name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += cost;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += cost;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = results[0]?.customer?.descriptiveName || 'Las Vegas';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        1056
+      ],
+      "id": "422d1bab-5921-4f67-8876-5072b6e3a2fa",
+      "name": "LV - Aggregate Google"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1280,
+        912
+      ],
+      "id": "186eab45-0584-4e78-94fe-b6dbd5e8c608",
+      "name": "LV - Upsert to Supabase (Google - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'las-vegas';\nconst location_name = d.account_name || 'Las Vegas';\nconst platform      = 'google';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        1056
+      ],
+      "id": "f94aa5fe-0629-4951-95da-73dc1276e899",
+      "name": "LV - Format Google for Supabase"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1296,
+        1184
+      ],
+      "id": "445e81f9-fc08-4376-a04d-2381be8c1846",
+      "name": "LV - Upsert to Supabase (Google - DC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        1520
+      ],
+      "id": "b6496982-c482-4296-a360-381abe6124fc",
+      "name": "LV - Upsert to Supabase (Meta - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        1872
+      ],
+      "id": "7ceb1d09-1845-426b-b49e-8d0dbef63cce",
+      "name": "LV - Upsert to Supabase (Meta - TC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Config').first().json.meta_api_version }}/act_{{ $('Set Meta Config').first().json.las_vegas }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Config').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates').first().json.date_from }}\",\"until\":\"{{ $('Get Req. Dates').first().json.date_to }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        48,
+        1728
+      ],
+      "id": "e08150f1-6f8d-42a5-a311-85c49bb72768",
+      "name": "LV - Create Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Config').first().json.meta_api_version }}/{{ $('LV - Create Meta Report').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Config').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        384,
+        1728
+      ],
+      "id": "4decf553-f2c5-48da-a149-30556e42280e",
+      "name": "LV - Get Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials = $('Set Meta Config').first().json;\nconst convTypes   = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of data) {\n  const date    = r.date_start || 'unknown';  // now a single day\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv    = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend   = Number(r.spend || 0);\n  const impr    = Number(r.impressions || 0);\n  const clks    = Number(r.clicks || 0);\n  const cId     = r.campaign_id   || '';\n  const cName   = r.campaign_name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += spend;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += spend;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = data[0]?.account_name || 'Las Vegas';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        1728
+      ],
+      "id": "8350005e-f4a2-4e30-b135-2825a2571902",
+      "name": "LV - Aggregate Meta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'las-vegas';\nconst location_name = d.account_name || 'Las Vegas';\nconst platform      = 'meta';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        1728
+      ],
+      "id": "f9cc060c-d496-4bbf-9821-9c1e4a93a0dc",
+      "name": "LV - Format Meta for Supabase"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Supabase Config": {
+      "main": [
+        [
+          {
+            "node": "Set Meta Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Req. Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "LV - Get Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates": {
+      "main": [
+        [
+          {
+            "node": "Set Supabase Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates (Temp Testing)": {
+      "main": [
+        []
+      ]
+    },
+    "Daily Metrics Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "LV - Upsert to Supabase (Meta - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "LV - Upsert to Supabase (Meta - TC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Meta Config": {
+      "main": [
+        [
+          {
+            "node": "Set Google Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Metrics Formatting (Google)": {
+      "main": [
+        [
+          {
+            "node": "LV - Upsert to Supabase (Google - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting (Google)": {
+      "main": [
+        [
+          {
+            "node": "LV - Upsert to Supabase (Google - DC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Google Config": {
+      "main": [
+        [
+          {
+            "node": "LV - Get Google",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LV - Create Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Get Google": {
+      "main": [
+        [
+          {
+            "node": "LV - Aggregate Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Aggregate Google": {
+      "main": [
+        [
+          {
+            "node": "LV - Format Google for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Format Google for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting (Google)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting (Google)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Create Meta Report": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Get Meta Report": {
+      "main": [
+        [
+          {
+            "node": "LV - Aggregate Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Aggregate Meta": {
+      "main": [
+        [
+          {
+            "node": "LV - Format Meta for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LV - Format Meta for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "yT84l3hJEkaNS2GS",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "1f619785-a335-4368-9645-195342b4c4cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f03b8919fd05361b5c3eb796ae86ee1bb67c20678554d955a51a056d9b315a4d"
+  },
+  "id": "d8GY9saf5ATtBs9i",
+  "tags": []
+}

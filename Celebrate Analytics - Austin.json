@@ -1,0 +1,1135 @@
+{
+  "name": "Celebrate Analytics - Austin",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sb-0001",
+              "name": "supabase_url",
+              "value": "https://jadmrftsvtklvgvsonoo.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "sb-0002",
+              "name": "supabase_service_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI3MzE4MCwiZXhwIjoyMDk0ODQ5MTgwfQ.zu9dOTIhkSNO0fbdQTN7f-F0OFYI8-1RXyvcZNYEYdU",
+              "type": "string"
+            },
+            {
+              "id": "sb-0003",
+              "name": "supabase_anon_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzMxODAsImV4cCI6MjA5NDg0OTE4MH0.gjpbPb96aVW2tfiWA7Nw917fJQERyckIyGUKmvQft8U",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -976,
+        1424
+      ],
+      "id": "c449995e-a9b5-4f0f-91ae-33ce3a0bd850",
+      "name": "Set Supabase Config"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1360,
+        1424
+      ],
+      "id": "d44f517c-0609-47ba-a76b-469f62857c0e",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        1424
+      ],
+      "id": "36deb74e-de04-404e-abbb-386bb952b339",
+      "name": "Wait",
+      "webhookId": "a9b31eb3-e1b1-4e8b-b407-03068a5f6f59"
+    },
+    {
+      "parameters": {
+        "jsCode": "const yesterday = new Date();\nyesterday.setDate(yesterday.getDate() - 1);\nconst d = yesterday.toISOString().split('T')[0];\n\nreturn [{ json: { date_from: d, date_to: d } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        1424
+      ],
+      "id": "705d529a-a1fd-40bd-903d-a8e8ff771520",
+      "name": "Get Req. Dates"
+    },
+    {
+      "parameters": {
+        "jsCode": "const to = new Date();\nto.setDate(to.getDate() - 1);\nconst from = new Date(to);\nfrom.setDate(from.getDate() - 89);\n\nreturn [{\n  json: {\n    date_from: from.toISOString().split('T')[0],\n    date_to:   to.toISOString().split('T')[0]\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        1616
+      ],
+      "id": "ff118566-a0bc-4c39-9f29-40ffcf44935c",
+      "name": "Get Req. Dates (Temp Testing)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        1232
+      ],
+      "id": "f2bd4e78-4544-431b-97fd-7f69e373c64a",
+      "name": "Daily Metrics Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        1568
+      ],
+      "id": "0f24545d-f4b4-4b76-8d94-27747d7c64bc",
+      "name": "Top Campaigns Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "meta_access_token",
+              "value": "EAAEAq6mB210BRbiOEdZBSX7um26ZCEHuBRCEBqO5n6VrPQZAi0tx5zDhIZByLcfANhZBZAwZAZBXU8GNBliBGQxpTKqF6wQ1vkERPg44zgZAzsFrZAGQrkwvcNoK3naV317Ni0gQOSMgmCTdFp7sxzOjHch1Ru4Skrc0c2wrHJ8GdvGQZCvRPMU4zJPC7KAmEz7q1rZBhAZDZD",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "meta_api_version",
+              "value": "v25.0",
+              "type": "string"
+            },
+            {
+              "id": "757ba073-039a-48e3-a844-413016190d19",
+              "name": "meta_conversion_action_types",
+              "value": "lead",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "austin",
+              "value": "1079447286488041",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "meta_account_1_name",
+              "value": "Celebrate Dental - Austin",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        1424
+      ],
+      "id": "2fb472b1-82d2-418a-9178-2053be7106fe",
+      "name": "Set Meta Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        448
+      ],
+      "id": "3cadf03c-fe79-4fb9-b0e1-ed7d767dfde9",
+      "name": "Daily Metrics Formatting (Google)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        720
+      ],
+      "id": "0823c141-9a29-4fff-8180-0a43f847adec",
+      "name": "Top Campaigns Formatting (Google)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "developer_token",
+              "value": "b7Jj7ADOuQn-eCJnYL9p-g",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "google_api_version",
+              "value": "v20",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "customer_id",
+              "value": "6276915301",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "google_account_1_name",
+              "value": "Celebrate Dental - Austin",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -464,
+        1424
+      ],
+      "id": "a4777814-1fc9-4094-96dd-697495ea85d8",
+      "name": "Set Google Config"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "40b62cd2-742f-4f84-8841-6c39e092dbe3",
+              "leftValue": "={{ $json._table }}",
+              "rightValue": "=daily_metrics",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        2224
+      ],
+      "id": "1c19f6d0-ff4e-4209-9fd7-4b77ad8ac40d",
+      "name": "Split Tables"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000001",
+              "name": "access_token",
+              "value": "9dd776a9a4f3ea4ae4a5668dc39b3746ba7903ff",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000002",
+              "name": "advertiser_id",
+              "value": "7206469414487719938",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000003",
+              "name": "location_id",
+              "value": "san-antonio",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000004",
+              "name": "location_name",
+              "value": "Celebrate Dental - SA",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        1424
+      ],
+      "id": "68466d51-a959-46a8-83c1-18eb3b2cd41f",
+      "name": "Set TikTok Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const { _table, ...rest } = item.json\n  return { json: rest }\n})\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        2032
+      ],
+      "id": "f8292a7c-f049-4007-8215-441ee7a84565",
+      "name": "Daily Metrics Formatting (TikTok)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const { _table, ...rest } = item.json\n  return { json: rest }\n})\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        2416
+      ],
+      "id": "1ba3c31f-737c-4d06-8aab-a4ad0035126d",
+      "name": "Top Campaigns Formatting (TikTok)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/{{ $json.google_api_version }}/customers/{{ $json.customer_id }}/googleAds:search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleAdsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "developer-token",
+              "value": "={{ $json.developer_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  query: `\n    SELECT\n      customer.id,\n      customer.descriptive_name,\n      campaign.id,\n      campaign.name,\n      segments.date,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.cost_micros,\n      metrics.conversions\n    FROM campaign\n    WHERE segments.date BETWEEN '${$('Get Req. Dates').first().json.date_from}'\n      AND '${$('Get Req. Dates').first().json.date_to}'\n  `\n}\n}}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        592
+      ],
+      "id": "eb97abe5-71ec-454d-875c-f98bba68b328",
+      "name": "AU - Get Google",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "googleAdsOAuth2Api": {
+          "id": "OHWAGJdokBHrnA3Z",
+          "name": "Google Ads account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Config').first().json.meta_api_version }}/act_{{ $('Set Meta Config').first().json.austin }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Config').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates').first().json.date_from }}\",\"until\":\"{{ $('Get Req. Dates').first().json.date_to }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        1424
+      ],
+      "id": "a1676ede-0bbb-485d-934c-6932ee23f27b",
+      "name": "AU - Create Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "url": "https://business-api.tiktok.com/open_api/v1.3/report/integrated/get/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "advertiser_id",
+              "value": "={{ $('Set TikTok Config').item.json.advertiser_id }}"
+            },
+            {
+              "name": "report_type",
+              "value": "BASIC"
+            },
+            {
+              "name": "dimensions",
+              "value": "=[\"campaign_id\",\"stat_time_day\"]"
+            },
+            {
+              "name": "metrics",
+              "value": "=[\"campaign_name\",\"spend\",\"impressions\",\"clicks\",\"conversion\"]"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ $('Get Req. Dates').item.json.date_from }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $('Get Req. Dates').item.json.date_to }}"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "page_size",
+              "value": "100"
+            },
+            {
+              "name": "data_level",
+              "value": "AUCTION_CAMPAIGN"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Access-Token",
+              "value": "={{ $('Set TikTok Config').item.json.access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        2224
+      ],
+      "id": "05d7f5f8-8420-44f8-9e48-910abdc8bfc9",
+      "name": "AU - Get Tiktok"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = items[0].json.results || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of results) {\n  const date  = r.segments?.date || 'unknown';\n  const cost  = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr  = Number(r.metrics?.impressions || 0);\n  const clks  = Number(r.metrics?.clicks || 0);\n  const conv  = Number(r.metrics?.conversions || 0);\n  const cId   = String(r.campaign?.id || '');\n  const cName = r.campaign?.name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += cost;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += cost;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = results[0]?.customer?.descriptiveName || 'Springfield';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        592
+      ],
+      "id": "57aab110-8d95-4659-bc9c-60678fd008f4",
+      "name": "AU - Aggregate Google"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'austin';\nconst location_name = d.account_name || 'Austin';\nconst platform      = 'google';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        592
+      ],
+      "id": "027f7df7-aa79-4052-b6b7-dda8556cd4c2",
+      "name": "AU - Format Google for Supabase"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1216,
+        448
+      ],
+      "id": "78b91431-2d18-478b-9b7a-991347c10bc8",
+      "name": "AU - Upsert to Supabase (Google - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1232,
+        720
+      ],
+      "id": "ab940dba-ea2b-4ef1-bd7f-94b026ca89a3",
+      "name": "AU - Upsert to Supabase (Google - DC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Config').first().json.meta_api_version }}/{{ $('AU - Create Meta Report').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Config').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        288,
+        1424
+      ],
+      "id": "9ee6ef15-6bb5-459b-a622-2bf8f1a01c73",
+      "name": "AU - Get Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials = $('Set Meta Config').first().json;\nconst convTypes   = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of data) {\n  const date    = r.date_start || 'unknown';  // now a single day\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv    = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend   = Number(r.spend || 0);\n  const impr    = Number(r.impressions || 0);\n  const clks    = Number(r.clicks || 0);\n  const cId     = r.campaign_id   || '';\n  const cName   = r.campaign_name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += spend;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += spend;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = data[0]?.account_name || 'West Republic';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        1424
+      ],
+      "id": "9a0a1234-cec7-4882-9d81-e1e7649b662e",
+      "name": "AU - Aggregate Meta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'austin';\nconst location_name = d.account_name || 'Austin';\nconst platform      = 'meta';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        1424
+      ],
+      "id": "017a995a-6427-4b96-b91f-d9164edde16b",
+      "name": "AU - Format Meta for Supabase"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        1232
+      ],
+      "id": "6051d58c-1722-48b0-bba9-30eb6532ba2b",
+      "name": "AU - Upsert to Supabase (Meta - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1216,
+        1568
+      ],
+      "id": "52806223-aeaf-4b64-a6d4-1706667b2e24",
+      "name": "AU - Upsert to Supabase (Meta - TC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle both shapes: direct object or array-wrapped\nconst raw = $input.first().json\nconst response = Array.isArray(raw) ? raw[0] : raw\nconst rows = response?.data?.list\n\nif (!rows || rows.length === 0) return []\n\n// ── daily_metrics: aggregate by date ──\nconst byDate = {}\nfor (const item of rows) {\n  const date = item.dimensions.stat_time_day.slice(0, 10)\n  if (!byDate[date]) byDate[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 }\n  byDate[date].spend       += parseFloat(item.metrics.spend)\n  byDate[date].impressions += parseInt(item.metrics.impressions)\n  byDate[date].clicks      += parseInt(item.metrics.clicks)\n  byDate[date].conversions += parseInt(item.metrics.conversion)\n}\n\nconst metricsRows = Object.entries(byDate).map(([date, m]) => ({\n  json: {\n    _table:        'daily_metrics',\n    location_id:   'austin',\n    location_name: 'Austin',\n    platform:      'tiktok',\n    date,\n    spend:         Math.round(m.spend * 100) / 100,\n    impressions:   m.impressions,\n    clicks:        m.clicks,\n    conversions:   m.conversions,\n    cpl:           m.conversions > 0 ? Math.round((m.spend / m.conversions) * 100) / 100 : null,\n    ctr:           m.impressions > 0 ? Math.round((m.clicks / m.impressions) * 10000) / 10000 : 0,\n  }\n}))\n\n// ── daily_campaigns: one row per campaign per day ──\nconst campaignRows = rows.map(item => {\n  const spend       = parseFloat(item.metrics.spend)\n  const impressions = parseInt(item.metrics.impressions)\n  const clicks      = parseInt(item.metrics.clicks)\n  const conversions = parseInt(item.metrics.conversion)\n  return {\n    json: {\n      _table:        'daily_campaigns',\n      location_id:   'your-location-id',\n      location_name: 'Your Location',\n      platform:      'tiktok',\n      date:          item.dimensions.stat_time_day.slice(0, 10),\n      campaign_id:   item.dimensions.campaign_id,\n      campaign_name: item.metrics.campaign_name,\n      spend:         Math.round(spend * 100) / 100,\n      impressions,\n      clicks,\n      conversions,\n      cpl:           conversions > 0 ? Math.round((spend / conversions) * 100) / 100 : null,\n      ctr:           impressions > 0 ? Math.round((clicks / impressions) * 10000) / 10000 : 0,\n    }\n  }\n})\n\nreturn [...metricsRows, ...campaignRows]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        2224
+      ],
+      "id": "6d0f18e4-c011-416f-a871-341b54671672",
+      "name": "AU - Format Tiktok"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1024,
+        2032
+      ],
+      "id": "3bba6c0f-fcfc-41e3-8a79-1c66e9523ae4",
+      "name": "AU - Upsert to Supabase (TikTok - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        2416
+      ],
+      "id": "ecd7421a-26f4-47aa-9196-40813db64d08",
+      "name": "AU - Upsert to Supabase (TikTok - TC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Supabase Config": {
+      "main": [
+        [
+          {
+            "node": "Set Meta Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Req. Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "AU - Get Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates": {
+      "main": [
+        [
+          {
+            "node": "Set Supabase Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates (Temp Testing)": {
+      "main": [
+        []
+      ]
+    },
+    "Daily Metrics Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "AU - Upsert to Supabase (Meta - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "AU - Upsert to Supabase (Meta - TC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Meta Config": {
+      "main": [
+        [
+          {
+            "node": "Set TikTok Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Metrics Formatting (Google)": {
+      "main": [
+        [
+          {
+            "node": "AU - Upsert to Supabase (Google - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting (Google)": {
+      "main": [
+        [
+          {
+            "node": "AU - Upsert to Supabase (Google - DC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Google Config": {
+      "main": [
+        [
+          {
+            "node": "AU - Get Google",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AU - Create Meta Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AU - Get Tiktok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set TikTok Config": {
+      "main": [
+        [
+          {
+            "node": "Set Google Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Tables": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting (TikTok)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Top Campaigns Formatting (TikTok)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Metrics Formatting (TikTok)": {
+      "main": [
+        [
+          {
+            "node": "AU - Upsert to Supabase (TikTok - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting (TikTok)": {
+      "main": [
+        [
+          {
+            "node": "AU - Upsert to Supabase (TikTok - TC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Get Google": {
+      "main": [
+        [
+          {
+            "node": "AU - Aggregate Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Create Meta Report": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Get Tiktok": {
+      "main": [
+        [
+          {
+            "node": "AU - Format Tiktok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Aggregate Google": {
+      "main": [
+        [
+          {
+            "node": "AU - Format Google for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Format Google for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting (Google)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting (Google)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Get Meta Report": {
+      "main": [
+        [
+          {
+            "node": "AU - Aggregate Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Aggregate Meta": {
+      "main": [
+        [
+          {
+            "node": "AU - Format Meta for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Format Meta for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AU - Format Tiktok": {
+      "main": [
+        [
+          {
+            "node": "Split Tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "yT84l3hJEkaNS2GS",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "657b2f79-6361-40c1-8b15-2d30c1863711",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f03b8919fd05361b5c3eb796ae86ee1bb67c20678554d955a51a056d9b315a4d"
+  },
+  "id": "yAzpjXMSK4Dz50fE",
+  "tags": []
+}
