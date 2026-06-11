@@ -1,7 +1,7 @@
 # Paid Ads Analytics Dashboard — Celebrate Dental and Braces
 ## Project Overview
 
-> **Implementation status as of 2026-06-10:** Dashboard, auth, and design system complete. Marketing data for **3 locations fully integrated** (San Antonio, Springfield, Las Vegas). Remaining 3 locations pending n8n workflow expansion (Austin, New Mexico, Kansas City). Platform expansion plan (SEO + Social Media) designed and documented in `EXPANSION.md`.
+> **Implementation status as of 2026-06-12:** Dashboard, auth, and design system complete. Marketing data for **5 locations fully integrated** (San Antonio, Springfield, Las Vegas, Austin, New Mexico). Springfield includes Olathe/Kansas City (rolled up). Platform expansion plan (SEO + Social Media) designed and documented in `EXPANSION.md`.
 
 This project is a custom-built paid advertising analytics dashboard designed to replace the current Madgicx reporting workflow with an internally managed platform.
 
@@ -163,12 +163,11 @@ Each of the 6 location dashboards shows:
 
 | Location | slug | Data Status |
 |---|---|---|
-| Springfield | `springfield` | ✅ Google + Meta live |
+| Springfield | `springfield` | ✅ Google + Meta live (incl. Olathe/KC) |
 | San Antonio | `san-antonio` | ✅ Google + Meta + TikTok live |
 | Las Vegas | `las-vegas` | ✅ Google + Meta live |
-| Austin | `austin` | Pending |
-| New Mexico | `new-mexico` | Pending |
-| Kansas City | `kansas-city` | Pending |
+| Austin | `austin` | ✅ Google + Meta live |
+| New Mexico | `new-mexico` | ✅ Google + Meta live |
 
 ## Executive Dashboard
 

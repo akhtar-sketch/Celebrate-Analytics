@@ -5,7 +5,7 @@ export const LOCATIONS: LocationConfig[] = [
     id: 'springfield',
     name: 'Springfield',
     googleLocationId: 'springfield',
-    metaLocationIds: ['west-republic', 'north-glenstone', 'lindbergh'],
+    metaLocationIds: ['west-republic', 'north-glenstone', 'north-lindbergh', 'olathe'],
   },
   {
     id: 'san-antonio',
@@ -23,19 +23,13 @@ export const LOCATIONS: LocationConfig[] = [
     id: 'austin',
     name: 'Austin',
     googleLocationId: 'austin',
-    metaLocationIds: [],
+    metaLocationIds: ['austin'],
   },
   {
     id: 'new-mexico',
     name: 'New Mexico',
     googleLocationId: 'new-mexico',
     metaLocationIds: ['new-mexico'],
-  },
-  {
-    id: 'kansas-city',
-    name: 'Kansas City',
-    googleLocationId: 'kansas-city',
-    metaLocationIds: ['olathe'],
   },
 ]
 

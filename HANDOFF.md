@@ -3,7 +3,7 @@
 **Company:** Celebrate Dental and Braces
 **Project:** Daily paid ads analytics dashboard replacing Madgicx
 **Last updated:** 2026-06-10
-**Current status:** 3 of 6 locations fully integrated and live (San Antonio, Springfield, Las Vegas). Dashboard deployed on Vercel (celebrate-analytics.vercel.app). OTP auth working. 3 locations pending n8n expansion (Austin, New Mexico, Kansas City). Platform expansion to SEO + Social Media designed and documented.
+**Current status:** 5 of 5 locations fully integrated and live (San Antonio, Springfield, Las Vegas, Austin, New Mexico). Springfield includes Olathe/Kansas City rolled up. Dashboard deployed on Vercel (celebrate-analytics.vercel.app). OTP auth working. Platform expansion to SEO + Social Media designed and documented.
 
 ---
 
@@ -126,8 +126,7 @@ d:\AI\
 - [x] Platform expansion plan documented in `EXPANSION.md`
 
 ### Pending / Not Yet Done
-- [ ] Expand n8n workflow to remaining 3 locations: Austin, New Mexico, Kansas City (Google + Meta for each)
-- [ ] Add TikTok branches to remaining locations as TikTok accounts are onboarded
+- [ ] Add TikTok branches to remaining locations (Las Vegas, Austin, New Mexico, Springfield) as TikTok accounts are onboarded
 - [ ] Google Chat new-user notification (dropped due to pg_net issue — see below)
 - [ ] Custom domain (`analytics.celebratedental.com`) → add in Vercel Project Settings → Domains
 - [ ] Phase 5 expansion: SEO dashboard + Social Media dashboard (see `EXPANSION.md`)
@@ -263,11 +262,10 @@ All tables have RLS enabled. `user_roles` and `user_location_access` allow no di
 | Location | Google | Meta | TikTok | Notes |
 |---|---|---|---|---|
 | San Antonio | ✅ `2429608734` | ✅ `1015442443965530` | ✅ `1759853290066977` | All platforms live |
-| Springfield | ✅ `3158644952` | ✅ 3 accounts (see below) | Pending | Meta: West Republic + N. Glenstone + Lindbergh |
+| Springfield | ✅ `3158644952` | ✅ West Republic + N. Glenstone + N. Lindbergh + Olathe | Pending | Kansas City/Olathe rolled into Springfield |
 | Las Vegas | ✅ `2391448311` | ✅ `2267056450490613` | Pending | |
-| Austin | Pending | Pending | Pending | Google: `2769191567` |
-| New Mexico | Pending | Pending | Pending | Google: `8844673094`, Meta: `515584627540511` |
-| Kansas City | Pending | Pending | Pending | Google: `7480415252`, Meta Olathe: `4175774955998110` |
+| Austin | ✅ `6276915301` | ✅ `1079447286488041` | Pending | |
+| New Mexico | ✅ `2769191567` | ✅ `515584627540511` | Pending | |
 
 Springfield Meta accounts:
 - West Republic: `885038680320071` (slug: `west-republic`)
@@ -422,11 +420,10 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role key>
 
 ## Immediate Next Steps (Priority Order)
 
-1. **Expand n8n to remaining 3 locations** — duplicate Google + Meta branches for Austin, New Mexico, Kansas City. Run 90-day backfill per location.
-2. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern.
-3. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
-4. **Add custom domain** — `analytics.celebratedental.com` → Vercel Project Settings → Domains → CNAME to Vercel; update Supabase Site URL + Redirect URLs.
-5. **Begin Phase 1 of expansion plan** (when ready) — update role model, restructure routes, update middleware.
+1. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern (Las Vegas, Springfield, Austin, New Mexico).
+2. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
+3. **Add custom domain** — `analytics.celebratedental.com` → Vercel Project Settings → Domains → CNAME to Vercel; update Supabase Site URL + Redirect URLs.
+4. **Begin Phase 1 of expansion plan** (when ready) — update role model, restructure routes, update middleware.
 
 ---
 
