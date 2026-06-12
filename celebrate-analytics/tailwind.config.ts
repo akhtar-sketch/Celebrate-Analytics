@@ -26,6 +26,26 @@ const config: Config = {
           2:       'rgb(var(--c-ink-2) / <alpha-value>)',
           3:       'rgb(var(--c-ink-3) / <alpha-value>)',
         },
+        // Brand tokens
+        brand: {
+          DEFAULT: 'rgb(var(--c-brand)      / <alpha-value>)',
+          mid:     'rgb(var(--c-brand-mid)  / <alpha-value>)',
+          soft:    'rgb(var(--c-brand-soft) / <alpha-value>)',
+        },
+        accent: {
+          DEFAULT: 'rgb(var(--c-accent)      / <alpha-value>)',
+          soft:    'rgb(var(--c-accent-soft) / <alpha-value>)',
+        },
+        // Sidebar tokens (always dark regardless of theme)
+        sidebar: {
+          bg:     'rgb(var(--c-sidebar-bg)     / <alpha-value>)',
+          border: 'rgb(var(--c-sidebar-border) / <alpha-value>)',
+          ink:    'rgb(var(--c-sidebar-ink)    / <alpha-value>)',
+          'ink-2':'rgb(var(--c-sidebar-ink-2)  / <alpha-value>)',
+          'ink-3':'rgb(var(--c-sidebar-ink-3)  / <alpha-value>)',
+          wash:   'rgb(var(--c-sidebar-wash)   / <alpha-value>)',
+          active: 'rgb(var(--c-sidebar-active) / <alpha-value>)',
+        },
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],

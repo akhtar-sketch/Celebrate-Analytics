@@ -5,36 +5,75 @@
 /* ── Design tokens ─────────────────────────────────────────────
    Values are R G B triplets (no commas) so Tailwind's
    alpha modifier syntax  bg-surface/50  works correctly.
+
+   Brand palette:
+     Primary blue  — deep navy anchor
+     Accent amber  — warm gold highlight (Celebrate brand yellow)
+     Neutrals      — white, greys, off-white
 ───────────────────────────────────────────────────────────────── */
 
-/* Light theme — steel-blue healthcare aesthetic */
+/* Light theme */
 :root {
-  --c-canvas:     238 244 252;   /* #eef4fc — light steel-blue page */
+  --c-canvas:     248 249 252;   /* #f8f9fc — warm off-white page */
   --c-surface:    255 255 255;   /* #ffffff — white cards */
-  --c-raised:     245 250 255;   /* #f5faff — elevated (dropdowns) */
-  --c-wash:       230 240 252;   /* #e6f0fc — hover/active wash */
+  --c-raised:     255 255 255;   /* #ffffff — elevated (dropdowns) */
+  --c-wash:       241 244 251;   /* #f1f4fb — hover/active wash */
 
-  --c-edge:       196 214 236;   /* #c4d6ec — default border */
-  --c-edge-soft:  216 230 246;   /* #d8e6f6 — subtle divider */
+  --c-edge:       218 225 240;   /* #dae1f0 — default border */
+  --c-edge-soft:  232 237 248;   /* #e8edf8 — subtle divider */
 
-  --c-ink:        11 22 42;      /* #0b162a — primary text */
-  --c-ink-2:      65 90 122;     /* #415a7a — secondary */
-  --c-ink-3:      138 162 192;   /* #8aa2c0 — muted */
+  --c-ink:        11  22  46;    /* #0b162e — primary text (rich navy) */
+  --c-ink-2:      74  96 138;    /* #4a608a — secondary */
+  --c-ink-3:      148 166 200;   /* #94a6c8 — muted */
+
+  /* Brand primaries */
+  --c-brand:      11  45 105;    /* #0b2d69 — deep navy blue */
+  --c-brand-mid:  20  66 152;    /* #144298 — mid blue */
+  --c-brand-soft: 235 240 252;   /* #ebf0fc — blue tint background */
+
+  --c-accent:     245 167 23;    /* #f5a717 — amber/gold */
+  --c-accent-soft:253 243 213;   /* #fdf3d5 — amber tint background */
+
+  /* Sidebar specific (always dark) */
+  --c-sidebar-bg:      11  28  66;    /* #0b1c42 */
+  --c-sidebar-border:  19  44  94;    /* #132c5e */
+  --c-sidebar-ink:     210 220 242;   /* #d2dcf2 */
+  --c-sidebar-ink-2:   120 148 200;   /* #7894c8 */
+  --c-sidebar-ink-3:   64  90 148;    /* #405a94 */
+  --c-sidebar-wash:    20  48 100;    /* #143064 */
+  --c-sidebar-active:  245 167 23;    /* #f5a717 — amber active */
 }
 
-/* Dark theme — deep navy premium */
+/* Dark theme */
 .dark {
-  --c-canvas:     7  15 29;      /* #070f1d — deep navy page */
-  --c-surface:    11 20 38;      /* #0b1426 — card surface */
-  --c-raised:     16 27 50;      /* #101b32 — elevated/dropdown */
-  --c-wash:       19 31 57;      /* #131f39 — hover wash */
+  --c-canvas:     7   14  30;    /* #070e1e — deep navy page */
+  --c-surface:    11  21  44;    /* #0b152c — card surface */
+  --c-raised:     15  28  58;    /* #0f1c3a — elevated/dropdown */
+  --c-wash:       19  34  68;    /* #132244 — hover wash */
 
-  --c-edge:       26 44 78;      /* #1a2c4e — border */
-  --c-edge-soft:  18 32 58;      /* #12203a — subtle divider */
+  --c-edge:       28  48  90;    /* #1c305a — border */
+  --c-edge-soft:  20  36  72;    /* #142448 — subtle divider */
 
-  --c-ink:        220 230 248;   /* #dce6f8 — primary text */
-  --c-ink-2:      112 140 182;   /* #708cb6 — secondary */
-  --c-ink-3:      58  80 114;    /* #3a5072 — muted */
+  --c-ink:        222 232 250;   /* #dee8fa — primary text */
+  --c-ink-2:      120 148 200;   /* #7894c8 — secondary */
+  --c-ink-3:      60  84 128;    /* #3c5480 — muted */
+
+  /* Brand primaries */
+  --c-brand:      74  122 228;   /* #4a7ae4 — brighter blue for dark mode */
+  --c-brand-mid:  100 148 248;   /* #6494f8 */
+  --c-brand-soft: 11  25  60;    /* #0b193c — blue tint background */
+
+  --c-accent:     245 167 23;    /* #f5a717 — amber stays the same */
+  --c-accent-soft:40  30   5;    /* #281e03 — amber tint background */
+
+  /* Sidebar (remains deeply dark, but richer) */
+  --c-sidebar-bg:      8   16  36;    /* #081024 */
+  --c-sidebar-border:  16  32  66;    /* #102042 */
+  --c-sidebar-ink:     210 220 242;   /* #d2dcf2 */
+  --c-sidebar-ink-2:   100 130 185;   /* #6482b9 */
+  --c-sidebar-ink-3:   50  72 120;    /* #324878 */
+  --c-sidebar-wash:    18  36  78;    /* #12244e */
+  --c-sidebar-active:  245 167 23;    /* #f5a717 — amber active */
 }
 
 /* ── Typography ──────────────────────────────────────────────── */
@@ -71,6 +110,24 @@ body {
 /* ── Text selection ──────────────────────────────────────────── */
 
 ::selection {
-  background-color: rgba(251, 191, 36, 0.25);
+  background-color: rgba(245, 167, 23, 0.28);
   color: inherit;
 }
+
+/* ── Sidebar utility classes ─────────────────────────────────── */
+
+.sidebar-bg        { background-color: rgb(var(--c-sidebar-bg)); }
+.sidebar-border    { border-color: rgb(var(--c-sidebar-border)); }
+.sidebar-ink       { color: rgb(var(--c-sidebar-ink)); }
+.sidebar-ink-2     { color: rgb(var(--c-sidebar-ink-2)); }
+.sidebar-ink-3     { color: rgb(var(--c-sidebar-ink-3)); }
+
+/* ── Brand utility classes ───────────────────────────────────── */
+
+.bg-brand      { background-color: rgb(var(--c-brand)); }
+.bg-brand-soft { background-color: rgb(var(--c-brand-soft)); }
+.text-brand    { color: rgb(var(--c-brand)); }
+
+.bg-accent      { background-color: rgb(var(--c-accent)); }
+.bg-accent-soft { background-color: rgb(var(--c-accent-soft)); }
+.text-accent    { color: rgb(var(--c-accent)); }
