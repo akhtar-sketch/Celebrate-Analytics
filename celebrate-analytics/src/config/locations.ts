@@ -6,6 +6,11 @@ export const LOCATIONS: LocationConfig[] = [
     name: 'Springfield',
     googleLocationId: 'springfield',
     metaLocationIds: ['west-republic', 'north-glenstone', 'north-lindbergh', 'olathe'],
+    subLocations: [
+      { id: 'west-republic',   name: 'West Republic' },
+      { id: 'north-glenstone', name: 'North Glenstone' },
+      { id: 'north-lindbergh', name: 'North Lindbergh' },
+    ],
   },
   {
     id: 'san-antonio',

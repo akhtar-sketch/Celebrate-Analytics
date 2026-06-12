@@ -7,6 +7,7 @@ import { fmtCurrency, fmtNumber, fmtPercent } from '@/lib/formatters'
 import { getSessionUser, getUserAccess, canAccessLocation } from '@/lib/auth'
 import KPICard from '@/components/KPICard'
 import DateRangePicker from '@/components/DateRangePicker'
+import SubLocationPicker from '@/components/SubLocationPicker'
 import SpendTrendChart from '@/components/SpendTrendChart'
 import PlatformCards from '@/components/PlatformCards'
 import PlatformComparisonChart from '@/components/PlatformComparisonChart'
@@ -18,7 +19,7 @@ export default async function LocationPage({
   searchParams,
 }: {
   params: Promise<{ location: string }>
-  searchParams: Promise<{ from?: string; to?: string }>
+  searchParams: Promise<{ from?: string; to?: string; sublocation?: string }>
 }) {
   const { location: locationId } = await params
   const location = getLocation(locationId)
@@ -31,17 +32,21 @@ export default async function LocationPage({
   if (!access) redirect('/pending')
   if (!canAccessLocation(access, locationId)) notFound()
 
-  const { from, to } = await searchParams
+  const { from, to, sublocation } = await searchParams
   const defaultRange = getDefaultRange()
   const range: DateRange = { from: from ?? defaultRange.from, to: to ?? defaultRange.to }
+
+  // Resolve active sub-location (only valid for locations that have subLocations config)
+  const validSubLocation = location.subLocations?.find((s) => s.id === sublocation)
+  const activeSubLocationId = validSubLocation?.id ?? null
 
   const priorRange = getPreviousPeriod(range)
   const priorPeriodLabel = formatDateRangeShort(priorRange)
 
   const [metrics, { points: trendPoints, isWeekly }, topCampaigns] = await Promise.all([
-    getLocationMetrics(location, range),
-    getSpendTrend(location, range),
-    getTopCampaigns(location, range),
+    getLocationMetrics(location, range, activeSubLocationId ?? undefined),
+    getSpendTrend(location, range, activeSubLocationId ?? undefined),
+    getTopCampaigns(location, range, activeSubLocationId ?? undefined),
   ])
 
   const colCount = metrics.byPlatform.length === 1 ? 1
@@ -56,12 +61,30 @@ export default async function LocationPage({
           <p className="text-[11px] font-semibold text-ink-3 uppercase tracking-widest mb-1">
             Location Dashboard
           </p>
-          <h1 className="text-2xl font-bold text-ink tracking-tight">{location.name}</h1>
+          <h1 className="text-2xl font-bold text-ink tracking-tight">
+            {location.name}
+            {validSubLocation && (
+              <span className="ml-2 text-lg font-medium text-ink-2">
+                — {validSubLocation.name}
+              </span>
+            )}
+          </h1>
           <p className="text-sm text-ink-3 mt-1">{formatDateRange(range)}</p>
         </div>
-        <Suspense fallback={null}>
-          <DateRangePicker current={range} />
-        </Suspense>
+        <div className="flex flex-col items-end gap-2">
+          {location.subLocations && location.subLocations.length > 0 && (
+            <Suspense fallback={null}>
+              <SubLocationPicker
+                subLocations={location.subLocations}
+                current={activeSubLocationId}
+                locationName={location.name}
+              />
+            </Suspense>
+          )}
+          <Suspense fallback={null}>
+            <DateRangePicker current={range} />
+          </Suspense>
+        </div>
       </div>
 
       {/* ── KPI band ───────────────────────────────────────── */}

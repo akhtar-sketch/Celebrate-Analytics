@@ -16,10 +16,11 @@ import type {
 
 export async function getLocationMetrics(
   location: LocationConfig,
-  range: DateRange
+  range: DateRange,
+  subLocationId?: string
 ): Promise<LocationMetrics> {
   const db = getSupabaseClient()
-  const ids = getAllLocationIds(location)
+  const ids = subLocationId ? [subLocationId] : getAllLocationIds(location)
   if (ids.length === 0) return emptyMetrics()
 
   const prevRange = getPreviousPeriod(range)
@@ -47,10 +48,11 @@ export async function getLocationMetrics(
 
 export async function getSpendTrend(
   location: LocationConfig,
-  range: DateRange
+  range: DateRange,
+  subLocationId?: string
 ): Promise<{ points: TrendPoint[]; isWeekly: boolean }> {
   const db = getSupabaseClient()
-  const ids = getAllLocationIds(location)
+  const ids = subLocationId ? [subLocationId] : getAllLocationIds(location)
   if (ids.length === 0) return { points: [], isWeekly: false }
 
   const { data, error } = await db
@@ -74,10 +76,11 @@ export async function getSpendTrend(
 
 export async function getTopCampaigns(
   location: LocationConfig,
-  range: DateRange
+  range: DateRange,
+  subLocationId?: string
 ): Promise<CampaignSummary[]> {
   const db = getSupabaseClient()
-  const ids = getAllLocationIds(location)
+  const ids = subLocationId ? [subLocationId] : getAllLocationIds(location)
   if (ids.length === 0) return []
 
   const { data, error } = await db

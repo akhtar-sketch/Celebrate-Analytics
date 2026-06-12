@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PRESETS, formatDateRange } from '@/lib/dateUtils'
 import type { DateRange } from '@/types'
 
@@ -34,6 +34,7 @@ function CalendarIcon() {
 
 export default function DateRangePicker({ current }: { current: DateRange }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
   const [customFrom, setCustomFrom] = useState(current.from)
   const [customTo, setCustomTo] = useState(current.to)
@@ -53,7 +54,9 @@ export default function DateRangePicker({ current }: { current: DateRange }) {
   }, [])
 
   function navigate(range: DateRange) {
-    const params = new URLSearchParams({ from: range.from, to: range.to })
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('from', range.from)
+    params.set('to', range.to)
     router.push(`?${params.toString()}`)
     setOpen(false)
   }

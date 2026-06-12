@@ -35,11 +35,17 @@ export interface DailyCampaignRow {
   ctr: number | null
 }
 
+export interface SubLocation {
+  id: string   // matches the location_id stored in Supabase (e.g. 'west-republic')
+  name: string // display name (e.g. 'West Republic')
+}
+
 export interface LocationConfig {
   id: string
   name: string
   googleLocationId: string | null
   metaLocationIds: string[]
+  subLocations?: SubLocation[]  // only for locations with multiple Meta sub-accounts (e.g. Springfield)
 }
 
 export interface PlatformMetrics {
