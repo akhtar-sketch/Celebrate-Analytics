@@ -46,6 +46,11 @@ export default function DateRangePicker({ current }: { current: DateRange }) {
     : formatDateRange(current)
 
   useEffect(() => {
+    setCustomFrom(current.from)
+    setCustomTo(current.to)
+  }, [current.from, current.to])
+
+  useEffect(() => {
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
@@ -81,7 +86,7 @@ export default function DateRangePicker({ current }: { current: DateRange }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-60 bg-raised border border-edge rounded-2xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-64 bg-raised border border-edge rounded-2xl shadow-xl z-50">
           <div className="p-1.5">
             {PRESETS.map((p) => {
               const pr = p.getRange()
