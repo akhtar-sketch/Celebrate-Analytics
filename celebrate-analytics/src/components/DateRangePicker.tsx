@@ -86,7 +86,7 @@ export default function DateRangePicker({ current }: { current: DateRange }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-raised border border-edge rounded-2xl shadow-xl z-50">
+        <div className="absolute right-0 mt-2 w-60 bg-raised border border-edge rounded-2xl shadow-xl z-50 overflow-hidden">
           <div className="p-1.5">
             {PRESETS.map((p) => {
               const pr = p.getRange()
@@ -110,21 +110,27 @@ export default function DateRangePicker({ current }: { current: DateRange }) {
             <p className="text-[10px] font-semibold text-ink-3 uppercase tracking-widest">
               Custom range
             </p>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={customFrom}
-                max={customTo}
-                onChange={(e) => setCustomFrom(e.target.value)}
-                className="flex-1 bg-surface border border-edge rounded-lg text-xs text-ink px-2.5 py-1.5 [color-scheme:light] dark:[color-scheme:dark] focus:outline-none focus:border-blue-500 transition-colors"
-              />
-              <input
-                type="date"
-                value={customTo}
-                min={customFrom}
-                onChange={(e) => setCustomTo(e.target.value)}
-                className="flex-1 bg-surface border border-edge rounded-lg text-xs text-ink px-2.5 py-1.5 [color-scheme:light] dark:[color-scheme:dark] focus:outline-none focus:border-blue-500 transition-colors"
-              />
+            <div className="space-y-1.5">
+              <div>
+                <p className="text-[10px] text-ink-3 mb-1">From</p>
+                <input
+                  type="date"
+                  value={customFrom}
+                  max={customTo}
+                  onChange={(e) => setCustomFrom(e.target.value)}
+                  className="w-full bg-surface border border-edge rounded-lg text-xs text-ink px-2.5 py-1.5 [color-scheme:light] dark:[color-scheme:dark] focus:outline-none focus:border-blue-500 transition-colors"
+                />
+              </div>
+              <div>
+                <p className="text-[10px] text-ink-3 mb-1">To</p>
+                <input
+                  type="date"
+                  value={customTo}
+                  min={customFrom}
+                  onChange={(e) => setCustomTo(e.target.value)}
+                  className="w-full bg-surface border border-edge rounded-lg text-xs text-ink px-2.5 py-1.5 [color-scheme:light] dark:[color-scheme:dark] focus:outline-none focus:border-blue-500 transition-colors"
+                />
+              </div>
             </div>
             <button
               onClick={applyCustom}
