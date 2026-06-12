@@ -1,7 +1,7 @@
 # Celebrate Analytics — n8n Ingestion Workflow
 
-**Active workflow file:** `d:\AI\Reporting System\Celebrate Analytics - Testing.json`
-**Status:** 3 locations fully integrated (San Antonio, Springfield, Las Vegas) — daily ingestion running. 3 remaining locations (Austin, New Mexico, Kansas City) pending workflow expansion.
+**Active workflow files:** 5 separate workflow files in `d:\AI\Celebrate Analytics\` — one per location.
+**Status:** All 5 locations live — daily ingestion running.
 **Purpose:** Daily paid ads data ingestion pipeline for Celebrate Dental and Braces.
 Pulls performance data from Google Ads, Meta Ads, and TikTok Ads every day, stores one row per location × platform × date in Supabase, and makes it available to the Celebrate Analytics dashboard.
 
@@ -27,11 +27,10 @@ Pulls performance data from Google Ads, Meta Ads, and TikTok Ads every day, stor
 | Location | Google Ads | Meta Ads | TikTok Ads |
 |---|---|---|---|
 | San Antonio | ✅ | ✅ | ✅ `1759853290066977` |
-| Springfield | ✅ | ✅ (3 accounts) | Pending |
+| Springfield | ✅ | ✅ (4 accounts: WR + NG + NL + Olathe) | Pending |
 | Las Vegas | ✅ | ✅ | Pending |
-| Austin | Pending | Pending | Pending |
-| New Mexico | Pending | Pending | Pending |
-| Kansas City | Pending | Pending | Pending |
+| Austin | ✅ | ✅ | Pending |
+| New Mexico | ✅ | ✅ | Pending |
 
 ---
 
@@ -350,11 +349,10 @@ INSERT INTO user_roles (user_id, role) VALUES ('<uuid>', 'viewer');
 INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-antonio');
 ```
 
-### 6. n8n Workflow (to expand to remaining 3 locations)
-- [ ] Duplicate Google branch for: Austin, New Mexico, Kansas City
-- [ ] Duplicate Meta branch for same locations
-- [ ] Add TikTok branches as TikTok accounts are onboarded for each location
-- [ ] Run 90-day backfill for each new location after adding
+### 6. n8n Workflows (all 5 locations live)
+- [x] Individual workflow files: San Antonio, Springfield, Las Vegas, Austin, New Mexico
+- [ ] Add TikTok branches as TikTok accounts are onboarded for each location (San Antonio pattern is built)
+- [ ] Activate Springfield Google sub-location test workflow once verified
 
 ### 7. Google Ads
 - [ ] Confirm the `googleAdsOAuth2Api` credential is still valid
@@ -368,28 +366,28 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 
 ## Account & Location Mapping
 
-### Google Ads Accounts (6 locations)
+### Google Ads Accounts (5 locations)
 | Location | Customer ID | location_id |
 |---|---|---|
 | Springfield | `3158644952` | `springfield` |
 | San Antonio | `2429608734` | `san-antonio` |
 | Las Vegas | `2391448311` | `las-vegas` |
-| Austin | `2769191567` | `austin` |
-| New Mexico | `8844673094` | `new-mexico` |
-| Kansas City | `7480415252` | `kansas-city` |
+| Austin | `6276915301` | `austin` |
+| New Mexico | `2769191567` | `new-mexico` |
 
-### Meta Ads Accounts (7 accounts across 5 locations)
+### Meta Ads Accounts (8 accounts across 5 locations)
 | Location | Variable | Account ID | location_id |
 |---|---|---|---|
 | West Republic (Springfield) | `west_republic` | `885038680320071` | `west-republic` |
 | North Glenstone (Springfield) | `n_glenstone` | `2203388956855958` | `north-glenstone` |
-| Lindbergh (Springfield) | `n_lindbergh` | `2203220086749865` | `lindbergh` |
+| North Lindbergh (Springfield) | `n_lindbergh` | `2203220086749865` | `north-lindbergh` |
+| Olathe (Springfield) | `olathe` | `4175774955998110` | `olathe` |
 | Las Vegas | `las_vegas` | `2267056450490613` | `las-vegas` |
-| Olathe (Kansas City) | `olathe` | `4175774955998110` | `olathe` |
 | San Antonio | `san_antonio` | `1015442443965530` | `san-antonio` |
 | New Mexico | `new_mexico` | `515584627540511` | `new-mexico` |
+| Austin | `austin` | `1079447286488041` | `austin` |
 
-> Springfield has 3 Meta accounts (West Republic, North Glenstone, Lindbergh). All three are aggregated into one Springfield dashboard view. `getAllLocationIds('springfield')` returns all four slugs.
+> Springfield has 4 Meta accounts (West Republic, North Glenstone, North Lindbergh, Olathe). All four are aggregated into one Springfield dashboard view by default. `getAllLocationIds('springfield')` returns all four slugs. When `?sublocation=<id>` is set, queries filter to that single slug.
 
 ### TikTok Ads Accounts
 | Location | Advertiser ID | location_id |
@@ -400,7 +398,6 @@ INSERT INTO user_location_access (user_id, location_id) VALUES ('<uuid>', 'san-a
 
 ## What's Not Built Yet
 
-- **3 remaining locations** — Austin, New Mexico, Kansas City need Google + Meta branches added to the workflow
 - **TikTok for remaining locations** — San Antonio pattern is built; duplicate for other locations as TikTok accounts are onboarded
 - **Google Chat new-user notification** — dropped temporarily due to `pg_net`/trigger issue; re-add once pg_net is confirmed available
 - **Error alerting** — add a Google Chat or email notification node if workflow fails mid-run

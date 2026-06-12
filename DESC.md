@@ -61,13 +61,13 @@ The design follows a premium dark/light theme with a deep navy dark mode and a c
 ## 1. Automated Data Aggregation
 
 The system pulls data from:
-- **Google Ads** — all 3 integrated locations live
-- **Meta Ads** — all 3 integrated locations live
+- **Google Ads** — all 5 locations live
+- **Meta Ads** — all 5 locations live
 - **TikTok Ads** — San Antonio live; other locations to be added as accounts are onboarded
 - GA4 (optional future)
 - FlexBook (future attribution phase)
 
-Data collection is handled using n8n workflows. The current workflow covers San Antonio, Springfield, and Las Vegas. The remaining 3 locations (Austin, New Mexico, Kansas City) need to be added by duplicating the existing workflow branches.
+Data collection is handled using n8n workflows — one per location (San Antonio, Springfield, Las Vegas, Austin, New Mexico).
 
 ---
 
@@ -117,7 +117,7 @@ Each location dashboard includes:
 
 Role-based access control with two roles:
 
-- **admin** — accesses all 6 locations + executive dashboard
+- **admin** — accesses all 5 locations + executive dashboard
 - **viewer** — accesses only assigned location dashboards
 
 ### Auth Flow (OTP — no passwords)
@@ -138,7 +138,7 @@ New users are created automatically on first OTP use — no separate signup page
 
 ## 5. Location-Level Performance
 
-Each of the 6 location dashboards shows:
+Each of the 5 location dashboards shows:
 - Location-specific spend, leads, CPL, CTR
 - Platform-level breakdown
 - Spend and lead trends
@@ -159,7 +159,7 @@ Each of the 6 location dashboards shows:
 
 ## Location Dashboards
 
-`/dashboard/[location]` — 6 locations:
+`/dashboard/[location]` — 5 locations:
 
 | Location | slug | Data Status |
 |---|---|---|
@@ -171,7 +171,7 @@ Each of the 6 location dashboards shows:
 
 ## Executive Dashboard
 
-`/dashboard/executive` — admin only. Shows all 6 locations.
+`/dashboard/executive` — admin only. Shows all 5 locations.
 
 ---
 
@@ -179,7 +179,7 @@ Each of the 6 location dashboards shows:
 
 | Layer | Technology | Status |
 |---|---|---|
-| Automation | n8n | **3 locations live** (SA, Springfield, LV); 3 remaining to add |
+| Automation | n8n | **5 locations live** (SA, Springfield, LV, Austin, NM) |
 | Database | Supabase (PostgreSQL) | Live (v2 schema) |
 | Frontend Dashboard | Next.js 15 + App Router | Complete |
 | Auth | Supabase Auth + `@supabase/ssr` | Complete — OTP (email code), Brevo SMTP, no passwords, RBAC |
@@ -196,11 +196,12 @@ Each of the 6 location dashboards shows:
 - v2 schema deployed (`supabase-schema-v2.sql`) — `daily_metrics` + `daily_campaigns`
 - Auth schema deployed (`supabase-schema-auth.sql`) — `user_roles` + `user_location_access`
 
-## Phase 2 — n8n Ingestion ⏳ (3 of 6 locations live)
+## Phase 2 — n8n Ingestion ✅ (all 5 locations live)
 - ✅ San Antonio — Google Ads + Meta Ads + TikTok Ads
-- ✅ Springfield — Google Ads + Meta Ads (3 Meta accounts: West Republic, North Glenstone, Lindbergh)
+- ✅ Springfield — Google Ads + Meta Ads (4 Meta accounts: West Republic, North Glenstone, North Lindbergh, Olathe)
 - ✅ Las Vegas — Google Ads + Meta Ads
-- Pending: Austin, New Mexico, Kansas City (Google + Meta for each)
+- ✅ Austin — Google Ads + Meta Ads
+- ✅ New Mexico — Google Ads + Meta Ads
 - Pending: TikTok for all locations except San Antonio
 
 ## Phase 3 — Dashboard ✅ Complete

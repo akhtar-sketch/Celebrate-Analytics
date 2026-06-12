@@ -2,8 +2,8 @@
 
 **Company:** Celebrate Dental and Braces
 **Project:** Daily paid ads analytics dashboard replacing Madgicx
-**Last updated:** 2026-06-10
-**Current status:** 5 of 5 locations fully integrated and live (San Antonio, Springfield, Las Vegas, Austin, New Mexico). Springfield includes Olathe/Kansas City rolled up. Dashboard deployed on Vercel (celebrate-analytics.vercel.app). OTP auth working. Platform expansion to SEO + Social Media designed and documented.
+**Last updated:** 2026-06-12
+**Current status:** 5 locations live (San Antonio, Springfield, Las Vegas, Austin, New Mexico). Kansas City removed — Olathe/KC is part of Springfield. Dashboard deployed on Vercel. Springfield sub-location picker built (West Republic / North Glenstone / North Lindbergh). Google sub-location workflow in test (maps campaigns via Google Sheet).
 
 ---
 
@@ -18,7 +18,7 @@ A fully internal analytics dashboard that:
 
 "Report" in this project means a **live analytics dashboard** with KPI cards, trend charts, platform breakdowns, and period-over-period comparisons — not a PDF or slide deck.
 
-**The goal** is eventually one dashboard per location showing Google Ads + Meta Ads + TikTok Ads, plus optional SEO and social media channels. Currently live: San Antonio (Google + Meta + TikTok), Springfield (Google + Meta), Las Vegas (Google + Meta).
+**The goal** is eventually one dashboard per location showing Google Ads + Meta Ads + TikTok Ads, plus optional SEO and social media channels. Currently live: San Antonio (Google + Meta + TikTok), Springfield (Google + Meta), Las Vegas (Google + Meta), Austin (Google + Meta), New Mexico (Google + Meta).
 
 ---
 
@@ -26,7 +26,7 @@ A fully internal analytics dashboard that:
 
 ```
 d:\AI\
-├── Reporting System\                              ← THIS project root
+├── Celebrate Analytics\                           ← THIS project root
 │   ├── HANDOFF.md                                 ← this file (read on context reset)
 │   ├── DESC.md                                    ← project requirements + feature overview
 │   ├── README.md                                  ← n8n workflow guide + account IDs + setup checklist
@@ -35,23 +35,28 @@ d:\AI\
 │   ├── supabase-schema.sql                        ← v1 schema (archived — do not use)
 │   ├── supabase-schema-v2.sql                     ← v2 data schema (deployed)
 │   ├── supabase-schema-auth.sql                   ← auth schema (deployed)
-│   ├── Celebrate Analytics - Testing.json         ← n8n workflow (covers SA + Springfield + LV)
+│   ├── Celebrate Analytics - San Antonio.json               ← n8n workflow: San Antonio (Google + Meta + TikTok)
+│   ├── Celebrate Analytics - Springfield.json               ← n8n workflow: Springfield (Google + Meta)
+│   ├── Celebrate Analytics - Las Vegas Region.json          ← n8n workflow: Las Vegas (Google + Meta)
+│   ├── Celebrate Analytics - Austin.json                    ← n8n workflow: Austin (Google + Meta)
+│   ├── Celebrate Analytics - New Mexico.json                ← n8n workflow: New Mexico (Google + Meta)
+│   └── Celebrate Analytics - Springfield (Google Sub-location Test).json  ← TEST ONLY, inactive — Google sub-location mapping via Sheets
 │   └── celebrate-analytics\                       ← Next.js 15 dashboard app
 │       ├── package.json
 │       ├── next.config.ts                         ← devIndicators disabled
 │       ├── tailwind.config.ts                     ← custom design tokens
 │       ├── .env.local.example                     ← copy → .env.local, fill in 3 Supabase keys
 │       └── src\
-│           ├── types.ts                           ← all shared TypeScript types
+│           ├── types.ts                           ← all shared TypeScript types (includes SubLocation interface)
 │           ├── middleware.ts                      ← route protection, session refresh
 │           ├── config\
-│           │   └── locations.ts                  ← 6 locations + Google/Meta/TikTok ID mapping
+│           │   └── locations.ts                  ← 5 locations + Google/Meta/TikTok ID mapping + subLocations for Springfield
 │           ├── lib\
 │           │   ├── supabase.ts                   ← service role client (server-side data queries)
 │           │   ├── supabase-server.ts            ← cookie-aware server client (session validation)
 │           │   ├── supabase-browser.ts           ← browser client (OTP sign-in, sign-out)
 │           │   ├── auth.ts                       ← getSessionUser, getUserAccess, RBAC helpers
-│           │   ├── queries.ts                    ← getLocationMetrics, getSpendTrend, getTopCampaigns, getExecutiveSummary
+│           │   ├── queries.ts                    ← getLocationMetrics, getSpendTrend, getTopCampaigns, getExecutiveSummary (all accept optional subLocationId)
 │           │   ├── dateUtils.ts                  ← PRESETS, getPreviousPeriod, formatDateRange, toMondayISO
 │           │   └── formatters.ts                 ← fmtCurrency, fmtNumber, fmtPercent, fmtDelta
 │           ├── components\
@@ -60,7 +65,8 @@ d:\AI\
 │           │   ├── Sidebar.tsx                   ← fixed left nav with logo (clickable for admins) + theme toggle
 │           │   ├── UserMenu.tsx                  ← user email, role badge, sign-out
 │           │   ├── KPICard.tsx                   ← metric with delta + prior period label
-│           │   ├── DateRangePicker.tsx           ← 9 presets + custom range (client, URL params)
+│           │   ├── SubLocationPicker.tsx         ← pill buttons for sub-location filter (Springfield only), ?sublocation= URL param
+│           │   ├── DateRangePicker.tsx           ← 9 presets + custom range (client, URL params — preserves ?sublocation=)
 │           │   ├── SpendTrendChart.tsx           ← area chart, Google + Meta + TikTok (Recharts)
 │           │   ├── PlatformCards.tsx             ← per-platform card with logo + full metrics
 │           │   ├── PlatformComparisonChart.tsx   ← grouped bar chart, conversions by platform over time
@@ -80,7 +86,7 @@ d:\AI\
 │                   │   ├── page.tsx              ← all-locations aggregate (admin only)
 │                   │   └── loading.tsx           ← skeleton loading UI
 │                   └── [location]\
-│                       ├── page.tsx              ← per-location KPI + charts
+│                       ├── page.tsx              ← per-location KPI + charts; renders SubLocationPicker for Springfield
 │                       └── loading.tsx           ← skeleton loading UI
 │
 └── n8n\Work\CD - Pulse\
@@ -94,7 +100,7 @@ d:\AI\
 
 | Layer | Technology | Status |
 |---|---|---|
-| Data ingestion | n8n | 3 locations live; 3 pending expansion; timezone: America/Chicago |
+| Data ingestion | n8n | 5 locations live; timezone: America/Chicago |
 | Database | Supabase (PostgreSQL) | Live — v2 schema deployed |
 | Frontend dashboard | Next.js 15 (App Router) | Complete |
 | Authentication | Supabase Auth + `@supabase/ssr` | Complete — OTP (no passwords), RBAC |
@@ -105,7 +111,7 @@ d:\AI\
 
 ---
 
-## What Has Been Achieved (as of 2026-06-10)
+## What Has Been Achieved (as of 2026-06-12)
 
 ### Completed
 - [x] Supabase v2 schema deployed (`daily_metrics` + `daily_campaigns` tables)
@@ -118,15 +124,21 @@ d:\AI\
 - [x] Admin logo click → `/dashboard/executive`; hover animation on all cards
 - [x] Design system — deep navy dark mode, healthcare light mode, CSS custom properties
 - [x] Loading skeletons on route transitions
-- [x] n8n daily ingestion workflow — **3 locations fully integrated and live:**
+- [x] n8n daily ingestion — **all 5 locations live with individual workflow files:**
   - San Antonio: Google Ads + Meta Ads + TikTok Ads
-  - Springfield: Google Ads + Meta Ads (3 Meta accounts aggregated)
+  - Springfield: Google Ads + Meta Ads (West Republic + N. Glenstone + N. Lindbergh + Olathe)
   - Las Vegas: Google Ads + Meta Ads
+  - Austin: Google Ads + Meta Ads
+  - New Mexico: Google Ads + Meta Ads
 - [x] Credentials security — access tokens in n8n Header Auth credentials, IDs in n8n `.env`
 - [x] Platform expansion plan documented in `EXPANSION.md`
+- [x] Springfield sub-location picker — pill buttons for West Republic / North Glenstone / North Lindbergh (URL param `?sublocation=<id>`); all other locations unaffected
+- [x] `DateRangePicker` bug fix — now preserves `?sublocation=` when changing date range
+- [x] Springfield Google sub-location test workflow created (inactive) — maps Google campaigns to sub-locations via Google Sheets campaign mapping
 
 ### Pending / Not Yet Done
-- [ ] Add TikTok branches to remaining locations (Las Vegas, Austin, New Mexico, Springfield) as TikTok accounts are onboarded
+- [ ] Activate Springfield Google sub-location workflow after testing (replace production workflow once verified)
+- [ ] Add TikTok branches to remaining locations (Las Vegas, Springfield, Austin, New Mexico) as TikTok accounts are onboarded
 - [ ] Google Chat new-user notification (dropped due to pg_net issue — see below)
 - [ ] Custom domain (`analytics.celebratedental.com`) → add in Vercel Project Settings → Domains
 - [ ] Phase 5 expansion: SEO dashboard + Social Media dashboard (see `EXPANSION.md`)
@@ -196,7 +208,7 @@ New users are auto-created by Supabase on first OTP use (`shouldCreateUser: true
 
 | Role | Executive dashboard | Location dashboards | Logo click |
 |---|---|---|---|
-| `admin` | ✅ Full access | ✅ All 6 locations | → /dashboard/executive |
+| `admin` | ✅ Full access | ✅ All 5 locations | → /dashboard/executive |
 | `viewer` | ❌ Redirected to first assigned location | ✅ Only assigned location_ids | No action |
 
 ### Granting Access (Admin SQL)
@@ -262,7 +274,7 @@ All tables have RLS enabled. `user_roles` and `user_location_access` allow no di
 | Location | Google | Meta | TikTok | Notes |
 |---|---|---|---|---|
 | San Antonio | ✅ `2429608734` | ✅ `1015442443965530` | ✅ `1759853290066977` | All platforms live |
-| Springfield | ✅ `3158644952` | ✅ West Republic + N. Glenstone + N. Lindbergh + Olathe | Pending | Kansas City/Olathe rolled into Springfield |
+| Springfield | ✅ `3158644952` | ✅ West Republic + N. Glenstone + N. Lindbergh + Olathe | Pending | Olathe/KC rolled into Springfield |
 | Las Vegas | ✅ `2391448311` | ✅ `2267056450490613` | Pending | |
 | Austin | ✅ `6276915301` | ✅ `1079447286488041` | Pending | |
 | New Mexico | ✅ `2769191567` | ✅ `515584627540511` | Pending | |
@@ -270,9 +282,10 @@ All tables have RLS enabled. `user_roles` and `user_location_access` allow no di
 Springfield Meta accounts:
 - West Republic: `885038680320071` (slug: `west-republic`)
 - North Glenstone: `2203388956855958` (slug: `north-glenstone`)
-- Lindbergh: `2203220086749865` (slug: `lindbergh`)
+- North Lindbergh: `2203220086749865` (slug: `north-lindbergh`)
+- Olathe: `4175774955998110` (slug: `olathe`)
 
-The dashboard aggregates all Springfield slugs into one view via `getAllLocationIds('springfield')` in `src/config/locations.ts`.
+The dashboard aggregates all Springfield slugs into one view by default via `getAllLocationIds('springfield')` in `src/config/locations.ts`. When `?sublocation=<id>` is set, queries filter to that single slug instead.
 
 ### n8n Workflow Settings
 - **Timezone:** `America/Chicago` (Central Time — covers SA, Springfield, Kansas City; handles CST/CDT automatically)
@@ -403,7 +416,7 @@ Full details in `EXPANSION.md`. Summary:
 ## Running Locally
 
 ```powershell
-cd "d:\AI\Reporting System\celebrate-analytics"
+cd "d:\AI\Celebrate Analytics\celebrate-analytics"
 # First time: copy .env.local.example → .env.local and fill in 3 Supabase keys
 npm install
 npm run dev   # → http://localhost:3000
@@ -420,10 +433,46 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role key>
 
 ## Immediate Next Steps (Priority Order)
 
-1. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern (Las Vegas, Springfield, Austin, New Mexico).
-2. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
-3. **Add custom domain** — `analytics.celebratedental.com` → Vercel Project Settings → Domains → CNAME to Vercel; update Supabase Site URL + Redirect URLs.
-4. **Begin Phase 1 of expansion plan** (when ready) — update role model, restructure routes, update middleware.
+1. **Activate Springfield Google sub-location workflow** — test `Celebrate Analytics - Springfield (Google Sub-location Test).json` in n8n (run manually for a date range), verify data lands in Supabase with correct `location_id` values (`west-republic`, `north-glenstone`, `north-lindbergh`), then replace the production Springfield workflow once verified.
+2. **Add TikTok for additional locations** — as each location's TikTok Ads account is onboarded, add a TikTok branch following the San Antonio pattern (Las Vegas, Springfield, Austin, New Mexico).
+3. **Re-implement Google Chat new-user notification** — confirm `pg_net` extension is available in Supabase (`CREATE EXTENSION IF NOT EXISTS pg_net`), set up n8n webhook, re-add the trigger.
+4. **Add custom domain** — `analytics.celebratedental.com` → Vercel Project Settings → Domains → CNAME to Vercel; update Supabase Site URL + Redirect URLs.
+5. **Begin Phase 1 of expansion plan** (when ready) — update role model, restructure routes, update middleware.
+
+---
+
+## Changelog
+
+### 2026-06-12 — Full Expansion + Springfield Sub-location Picker
+
+**n8n workflows:**
+- All 5 locations now have individual workflow JSON files in `d:\AI\Celebrate Analytics\`
+- Removed Kansas City as a standalone location — Olathe is rolled into Springfield
+- Added `Celebrate Analytics - Austin.json` and `Celebrate Analytics - New Mexico.json` (now live)
+
+**Bug fixes in `src/config/locations.ts`:**
+- `lindbergh` → `north-lindbergh` in Springfield `metaLocationIds` (was silently losing Lindbergh Meta data; workflow stores `north-lindbergh`)
+- Austin `metaLocationIds: []` → `['austin']` (workflow stores `location_id = 'austin'`)
+- Added `olathe` to Springfield `metaLocationIds`
+
+**Springfield sub-location picker (`src/components/SubLocationPicker.tsx`):**
+- New `SubLocation` interface in `src/types.ts`; optional `subLocations?: SubLocation[]` on `LocationConfig`
+- Springfield config gains `subLocations: [west-republic, north-glenstone, north-lindbergh]`
+- Dashboard (`src/app/dashboard/[location]/page.tsx`) reads `?sublocation=<id>`, validates against config, passes to all 3 query functions
+- All 3 query functions in `src/lib/queries.ts` accept optional `subLocationId?: string`; when set, queries use `[subLocationId]` instead of `getAllLocationIds(location)`
+- `SubLocationPicker` renders only for locations with `subLocations` defined — all other locations unchanged
+- Title shows "Springfield — West Republic" when a sub-location is active
+
+**DateRangePicker fix (`src/components/DateRangePicker.tsx`):**
+- `navigate()` was building `new URLSearchParams({ from, to })` from scratch, discarding `?sublocation=`
+- Fixed to use `new URLSearchParams(searchParams.toString())` as base, then `.set('from'/'to')` — preserves all existing params
+
+**Springfield Google sub-location test workflow:**
+- New file: `Celebrate Analytics - Springfield (Google Sub-location Test).json` — `active: false`, for testing only
+- Google branch: Sheets node (`Get Campaign Mapping`) → Code node (`Collect Campaign Mapping`, collapses N rows → 1 item) → `Springfield - Get Google` → `Springfield - Aggregate Google`
+- `Collect Campaign Mapping` Code: `return [{ json: { campaignRows: $input.all().map(i => i.json) } }]`
+- `Aggregate Google` reads `$('Collect Campaign Mapping').first().json.campaignRows`, builds `campaignMap` from sheet, routes each campaign to its sub-location slug; unknown campaigns fall back to `springfield`
+- Format node uses `row.location_id` / `row.location_name` per row (not hardcoded `springfield`)
 
 ---
 
