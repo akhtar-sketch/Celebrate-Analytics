@@ -1,0 +1,1598 @@
+{
+  "name": "Celebrate Analytics - Springfield (Google Sub-location Test)",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\nconst platform = 'google';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id:   row.location_id,\n  location_name: row.location_name,\n  platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr,\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id:   row.location_id,\n  location_name: row.location_name,\n  platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr,\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        272
+      ],
+      "id": "6443ccd2-82dd-4b26-ab99-328e62a661f5",
+      "name": "Springfield - Format Google for Supabase"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'west-republic';\nconst location_name = d.account_name || 'West Republic';\nconst platform      = 'meta';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        944
+      ],
+      "id": "ac3ee572-8625-42ce-a745-4d1fe5241d3d",
+      "name": "West Republic - Format Meta for Supabase"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "sb-0001",
+              "name": "supabase_url",
+              "value": "https://jadmrftsvtklvgvsonoo.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "sb-0002",
+              "name": "supabase_service_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTI3MzE4MCwiZXhwIjoyMDk0ODQ5MTgwfQ.zu9dOTIhkSNO0fbdQTN7f-F0OFYI8-1RXyvcZNYEYdU",
+              "type": "string"
+            },
+            {
+              "id": "sb-0003",
+              "name": "supabase_anon_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphZG1yZnRzdnRrbHZndnNvbm9vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNzMxODAsImV4cCI6MjA5NDg0OTE4MH0.gjpbPb96aVW2tfiWA7Nw917fJQERyckIyGUKmvQft8U",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -832,
+        1424
+      ],
+      "id": "c8e164f8-e400-4461-90bd-c3f830c7f106",
+      "name": "Set Supabase Config"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1600,
+        1424
+      ],
+      "id": "f0a72dde-263b-4a14-a463-46995900dcc8",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials').first().json.meta_api_version }}/{{ $('West Republic - Create Meta Report').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        944
+      ],
+      "id": "8a8d40b6-2c16-4a60-a27d-5b96ef7c4521",
+      "name": "WR - Get Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        944
+      ],
+      "id": "f23e48a5-6eb4-4be6-98d4-75ce20c8bc8d",
+      "name": "Wait",
+      "webhookId": "26bdc485-ea12-4031-8ce1-d13b7bcc9985"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        400
+      ],
+      "id": "dd25ae6b-ae06-468c-a3e2-55c757ad6fb3",
+      "name": "Top Campaigns Formatting"
+    },
+    {
+      "parameters": {
+        "jsCode": "const yesterday = new Date();\nyesterday.setDate(yesterday.getDate() - 1);\nconst d = yesterday.toISOString().split('T')[0];\n\nreturn [{ json: { date_from: d, date_to: d } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1408,
+        1424
+      ],
+      "id": "5fdd9c29-72f6-4f4b-865a-0cfb598390f9",
+      "name": "Get Req. Dates"
+    },
+    {
+      "parameters": {
+        "jsCode": "const to = new Date();\nto.setDate(to.getDate() - 1);\nconst from = new Date(to);\nfrom.setDate(from.getDate() - 89);\n\nreturn [{\n  json: {\n    date_from: from.toISOString().split('T')[0],\n    date_to:   to.toISOString().split('T')[0]\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1424,
+        1632
+      ],
+      "id": "7712b4e8-bc32-4d9c-b2b4-e8aa1f7c7376",
+      "name": "Get Req. Dates (Temp Testing)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build campaign name -> location_id lookup from Google Sheet\nconst sheetRows = $('Get Campaign Mapping').all();\nconst campaignMap = {};\nconst LOCATION_SLUG = {\n  'West Republic':   'west-republic',\n  'North Glenstone': 'north-glenstone',\n  'North Lindbergh': 'north-lindbergh',\n};\nfor (const row of sheetRows) {\n  const name = (row.json['Campaign Name'] || '').trim();\n  const loc  = (row.json['Location'] || '').trim();\n  if (name && LOCATION_SLUG[loc]) {\n    campaignMap[name] = LOCATION_SLUG[loc];\n  }\n}\n\nfunction getSubLocation(campaignName) {\n  return campaignMap[campaignName] || 'springfield';\n}\n\nconst LOCATION_NAME = {\n  'west-republic':   'West Republic',\n  'north-glenstone': 'North Glenstone',\n  'north-lindbergh': 'North Lindbergh',\n  'springfield':     'Springfield',\n};\n\nconst results = items[0].json.results || [];\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of results) {\n  const date   = r.segments?.date || 'unknown';\n  const cost   = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr   = Number(r.metrics?.impressions || 0);\n  const clks   = Number(r.metrics?.clicks || 0);\n  const conv   = Number(r.metrics?.conversions || 0);\n  const cId    = String(r.campaign?.id || '');\n  const cName  = r.campaign?.name || 'Unknown';\n  const subLoc = getSubLocation(cName);\n\n  const dateKey = `${subLoc}::${date}`;\n  if (!dateMap[dateKey]) dateMap[dateKey] = { subLoc, date, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[dateKey].spend       += cost;\n  dateMap[dateKey].impressions += impr;\n  dateMap[dateKey].clicks      += clks;\n  dateMap[dateKey].conversions += conv;\n\n  const campKey = `${cId}::${date}::${subLoc}`;\n  if (!campaignDayMap[campKey]) {\n    campaignDayMap[campKey] = { subLoc, date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[campKey].spend       += cost;\n  campaignDayMap[campKey].impressions += impr;\n  campaignDayMap[campKey].clicks      += clks;\n  campaignDayMap[campKey].conversions += conv;\n}\n\nconst daily_rows = Object.values(dateMap).map(m => ({\n  location_id:   m.subLoc,\n  location_name: LOCATION_NAME[m.subLoc] || m.subLoc,\n  date:          m.date,\n  spend:         Number(m.spend.toFixed(2)),\n  impressions:   m.impressions,\n  clicks:        m.clicks,\n  conversions:   m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0,\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  location_id:   c.subLoc,\n  location_name: LOCATION_NAME[c.subLoc] || c.subLoc,\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null,\n}));\n\nreturn [{ json: { daily_rows, campaign_rows } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        272
+      ],
+      "id": "ff3f0d11-489b-4388-8f0a-22fab2b49629",
+      "name": "Springfield - Aggregate Google"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        128
+      ],
+      "id": "c2916577-c101-4988-8b6e-0e1317150dd8",
+      "name": "Daily Metrics Formatting"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials').first().json.meta_api_version }}/act_{{ $('Set Meta Credentials').first().json.west_republic }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates').first().json.date_from }}\",\"until\":\"{{ $('Get Req. Dates').first().json.date_to }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        944
+      ],
+      "id": "3d21eee7-d651-4661-ad39-283cb8844555",
+      "name": "West Republic - Create Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials = $('Set Meta Credentials').first().json;\nconst convTypes   = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of data) {\n  const date    = r.date_start || 'unknown';  // now a single day\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv    = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend   = Number(r.spend || 0);\n  const impr    = Number(r.impressions || 0);\n  const clks    = Number(r.clicks || 0);\n  const cId     = r.campaign_id   || '';\n  const cName   = r.campaign_name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += spend;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += spend;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = data[0]?.account_name || 'West Republic';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        944
+      ],
+      "id": "d964ad7a-c979-40d7-abf6-62d6d66dcf69",
+      "name": "West Republic - Aggregate Meta"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        736
+      ],
+      "id": "abf4fc7a-85d8-43b7-8951-7b64e8070e96",
+      "name": "Daily Metrics Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        1088
+      ],
+      "id": "028cc0c1-4ba6-4f0e-b5ac-65fd7a674280",
+      "name": "Top Campaigns Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        1088
+      ],
+      "id": "f6de3c48-8db0-4ef7-b904-f4823de0c43e",
+      "name": "WR - Upsert to Supabase (Meta - TC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1136,
+        736
+      ],
+      "id": "c55fe894-ea2c-4160-a074-bdd048f0e652",
+      "name": "WR - Upsert to Supabase (Meta - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        1760
+      ],
+      "id": "9bbda9f8-b688-4195-8c08-8e32a180abd1",
+      "name": "Wait1",
+      "webhookId": "d970f8d9-b998-457a-8142-6dc61e716cef"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "meta_access_token",
+              "value": "EAAEAq6mB210BRbiOEdZBSX7um26ZCEHuBRCEBqO5n6VrPQZAi0tx5zDhIZByLcfANhZBZAwZAZBXU8GNBliBGQxpTKqF6wQ1vkERPg44zgZAzsFrZAGQrkwvcNoK3naV317Ni0gQOSMgmCTdFp7sxzOjHch1Ru4Skrc0c2wrHJ8GdvGQZCvRPMU4zJPC7KAmEz7q1rZBhAZDZD",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "meta_api_version",
+              "value": "v25.0",
+              "type": "string"
+            },
+            {
+              "id": "757ba073-039a-48e3-a844-413016190d19",
+              "name": "meta_conversion_action_types",
+              "value": "lead",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "west_republic",
+              "value": "885038680320071",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "meta_account_1_name",
+              "value": "CD - West Republic",
+              "type": "string"
+            },
+            {
+              "id": "66a1a014-a2e6-420d-be07-7125418254d7",
+              "name": "n_glenstone",
+              "value": "2203388956855958",
+              "type": "string"
+            },
+            {
+              "id": "c2761142-8fbe-4722-baff-4304cbce9cbf",
+              "name": "meta_account_2_name",
+              "value": "SP - North Glenstone",
+              "type": "string"
+            },
+            {
+              "id": "b7c38d2f-922f-4743-a478-397cd30fc428",
+              "name": "n_lindbergh",
+              "value": "2203220086749865",
+              "type": "string"
+            },
+            {
+              "id": "10638925-ec36-44ac-814c-745d316cdc8f",
+              "name": "meta_account_3_name",
+              "value": "CD - Lindbergh",
+              "type": "string"
+            },
+            {
+              "id": "2ed62f9d-5089-4140-b509-9b9d7b068b4c",
+              "name": "las_vegas",
+              "value": "2267056450490613",
+              "type": "string"
+            },
+            {
+              "id": "9aeb46e7-a747-4466-a705-2ae010128774",
+              "name": "meta_account_4_name",
+              "value": "Celebrate Dental - LV",
+              "type": "string"
+            },
+            {
+              "id": "499dd842-f660-4796-882e-7c60063a188f",
+              "name": "olathe",
+              "value": "4175774955998110",
+              "type": "string"
+            },
+            {
+              "id": "f929d66d-d881-4c28-9560-c74989a33b64",
+              "name": "meta_account_5_name",
+              "value": "CD - Olathe",
+              "type": "string"
+            },
+            {
+              "id": "d80ae6c1-680f-49c3-803d-9aaa190c4f06",
+              "name": "san_antonio",
+              "value": "1015442443965530",
+              "type": "string"
+            },
+            {
+              "id": "aeae3436-71e0-48a8-82e8-8ba7d8c51597",
+              "name": "meta_account_6_name",
+              "value": "Celebrate Dental - SA",
+              "type": "string"
+            },
+            {
+              "id": "05500fb9-d9e0-4246-83bf-6600363cdf69",
+              "name": "new_mexico",
+              "value": "515584627540511",
+              "type": "string"
+            },
+            {
+              "id": "201f3545-b7d4-49bd-b9c6-0e1aee5978d6",
+              "name": "meta_account_7_name",
+              "value": "CD - New Mexico",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        1424
+      ],
+      "id": "94eb6bac-6ae8-4ae6-917e-5ffc2a8ab10c",
+      "name": "Set Meta Credentials"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials').first().json.meta_api_version }}/act_{{ $('Set Meta Credentials').first().json.n_glenstone}}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates').first().json.date_from }}\",\"until\":\"{{ $('Get Req. Dates').first().json.date_to }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -16,
+        1760
+      ],
+      "id": "506266fb-7402-4973-88fe-9b4fdbee1bfb",
+      "name": "North Glenstone - Create Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials').first().json.meta_api_version }}/{{ $('North Glenstone - Create Meta Report').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        336,
+        1760
+      ],
+      "id": "3111db32-8c25-41c3-a46c-3ff31cc65039",
+      "name": "NG - Get Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials = $('Set Meta Credentials').first().json;\nconst convTypes   = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of data) {\n  const date    = r.date_start || 'unknown';  // now a single day\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv    = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend   = Number(r.spend || 0);\n  const impr    = Number(r.impressions || 0);\n  const clks    = Number(r.clicks || 0);\n  const cId     = r.campaign_id   || '';\n  const cName   = r.campaign_name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += spend;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += spend;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = data[0]?.account_name || 'West Republic';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        1760
+      ],
+      "id": "c3a623f5-aa05-4480-9f64-cc8c36c13241",
+      "name": "North Glenstone - Aggregate Meta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'north-glenstone';\nconst location_name = d.account_name || 'North Glenstone';\nconst platform      = 'meta';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        1760
+      ],
+      "id": "3a503ec1-0c90-4914-80cc-587fcf820493",
+      "name": "North Glenstone - Format Meta for Supabase"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        1552
+      ],
+      "id": "8dd62330-4ebd-4765-a799-e37939b28ac7",
+      "name": "NG - Daily Metrics Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        1904
+      ],
+      "id": "0111ad16-2ab6-4b4b-99ee-dbac6ff19b90",
+      "name": "NG - Top Campaigns Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        1904
+      ],
+      "id": "fa927417-7321-4908-bb57-8e319a1df41f",
+      "name": "NG - Upsert to Supabase (Meta - TC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        1552
+      ],
+      "id": "5818fe03-0594-4cd3-be3a-11f720395df3",
+      "name": "NG - Upsert to Supabase (Meta - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        2496
+      ],
+      "id": "f88f7882-f041-4832-9f31-056f920b7be6",
+      "name": "Wait2",
+      "webhookId": "d3f48b58-cf82-40e0-a4ff-b85ba617ba26"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials').first().json.meta_api_version }}/act_{{ $('Set Meta Credentials').first().json.n_lindbergh}}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials').first().json.meta_access_token }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            },
+            {
+              "name": "fields",
+              "value": "campaign_id,campaign_name,impressions,clicks,spend,ctr,cpc,actions,account_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={\"since\":\"{{ $('Get Req. Dates').first().json.date_from }}\",\"until\":\"{{ $('Get Req. Dates').first().json.date_to }}\"}"
+            },
+            {
+              "name": "time_increment",
+              "value": "1"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -64,
+        2496
+      ],
+      "id": "aab5869f-9d23-421a-8549-27952f7258ca",
+      "name": "North Lindbergh - Create Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/{{ $('Set Meta Credentials').first().json.meta_api_version }}/{{ $('North Lindbergh - Create Meta Report').item.json.report_run_id }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $('Set Meta Credentials').first().json.meta_access_token }}"
+            },
+            {
+              "name": "limit",
+              "value": "500"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        288,
+        2496
+      ],
+      "id": "9ddbd82b-34c4-4b45-bfe9-12149ec9ded4",
+      "name": "NL - Get Meta Report",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "jsCode": "const credentials = $('Set Meta Credentials').first().json;\nconst convTypes   = String(credentials.meta_conversion_action_types || 'lead').split(',').map(s => s.trim());\n\nconst data = items[0].json.data || [];\n\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of data) {\n  const date    = r.date_start || 'unknown';  // now a single day\n  const actions = Array.isArray(r.actions) ? r.actions : [];\n  const conv    = actions.filter(a => convTypes.includes(a.action_type)).reduce((s, a) => s + Number(a.value || 0), 0);\n  const spend   = Number(r.spend || 0);\n  const impr    = Number(r.impressions || 0);\n  const clks    = Number(r.clicks || 0);\n  const cId     = r.campaign_id   || '';\n  const cName   = r.campaign_name || 'Unknown';\n\n  if (!dateMap[date]) dateMap[date] = { spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[date].spend       += spend;\n  dateMap[date].impressions += impr;\n  dateMap[date].clicks      += clks;\n  dateMap[date].conversions += conv;\n\n  const key = `${cId}::${date}`;\n  if (!campaignDayMap[key]) {\n    campaignDayMap[key] = { date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[key].spend       += spend;\n  campaignDayMap[key].impressions += impr;\n  campaignDayMap[key].clicks      += clks;\n  campaignDayMap[key].conversions += conv;\n}\n\nconst daily_rows = Object.entries(dateMap).map(([date, m]) => ({\n  date,\n  spend:       Number(m.spend.toFixed(2)),\n  impressions: m.impressions,\n  clicks:      m.clicks,\n  conversions: m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null\n}));\n\nconst accountName = data[0]?.account_name || 'West Republic';\n\nreturn [{ json: { daily_rows, campaign_rows, account_name: accountName } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        2496
+      ],
+      "id": "cd0cf60c-272a-4826-b016-944dcff89e9d",
+      "name": "North Lindbergh - Aggregate Meta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = items[0].json;\n\nconst location_id   = 'north-lindbergh';\nconst location_name = d.account_name || 'North Lindbergh';\nconst platform      = 'meta';\n\nconst daily_metrics = (d.daily_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:        row.date,\n  spend:       row.spend,\n  impressions: row.impressions,\n  clicks:      row.clicks,\n  conversions: row.conversions,\n  cpl:         row.cpl,\n  ctr:         row.ctr\n}));\n\nconst daily_campaigns = (d.campaign_rows || []).map(row => ({\n  location_id, location_name, platform,\n  date:          row.date,\n  campaign_id:   row.campaign_id,\n  campaign_name: row.campaign_name,\n  spend:         row.spend,\n  impressions:   row.impressions,\n  clicks:        row.clicks,\n  conversions:   row.conversions,\n  cpl:           row.cpl,\n  ctr:           row.ctr\n}));\n\nreturn [{ json: { daily_metrics, daily_campaigns } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        2496
+      ],
+      "id": "f9092ac2-fc2f-4320-bcb1-eae4551f5e1e",
+      "name": "North Lindbergh - Format Meta for Supabase"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_metrics.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        2288
+      ],
+      "id": "20b70a39-f389-4fb6-8ed1-34ecb4cf3fa4",
+      "name": "NL - Daily Metrics Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        2288
+      ],
+      "id": "9af70064-ae2f-491a-acf1-3d138d4a1c1a",
+      "name": "NL - Upsert to Supabase (Meta - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.daily_campaigns.map(row => ({ json: row }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        2640
+      ],
+      "id": "10c679ad-f30d-4edf-bad0-b975fc2f1176",
+      "name": "NL - Top Campaigns Formatting (Meta)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1200,
+        2640
+      ],
+      "id": "8d198f46-79f4-433e-bcf3-6577323aa6a7",
+      "name": "NL - Upsert to Supabase (Meta - TC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_metrics?on_conflict=location_id,platform,date",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1152,
+        128
+      ],
+      "id": "8d43b9fc-cec2-4676-8c04-62761c6ee9f7",
+      "name": "SP - Upsert to Supabase (Google - DM)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Set Supabase Config').item.json.supabase_url }}/rest/v1/daily_campaigns?on_conflict=location_id,platform,date,campaign_id",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1168,
+        400
+      ],
+      "id": "7ec2c560-9893-407f-ae51-bfa8abfd1e7d",
+      "name": "SP - Upsert to Supabase (Google - DC)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "sX8UevZhq1vHe9hd",
+          "name": "Akhtar Testing"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/{{ $('Set Google Config').item.json.google_api_version }}/customers/{{ $('Set Google Config').item.json.customer_id }}/googleAds:search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleAdsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "developer-token",
+              "value": "={{ $('Set Google Config').item.json.developer_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  query: `\n    SELECT\n      customer.id,\n      customer.descriptive_name,\n      campaign.id,\n      campaign.name,\n      segments.date,\n      metrics.impressions,\n      metrics.clicks,\n      metrics.cost_micros,\n      metrics.conversions\n    FROM campaign\n    WHERE segments.date BETWEEN '${$('Get Req. Dates').first().json.date_from}'\n      AND '${$('Get Req. Dates').first().json.date_to}'\n  `\n}\n}}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -48,
+        272
+      ],
+      "id": "d009abb9-b36e-4e53-b93f-4cab22d3a8dd",
+      "name": "Springfield - Get Google",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "credentials": {
+        "googleAdsOAuth2Api": {
+          "id": "OHWAGJdokBHrnA3Z",
+          "name": "Google Ads account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3494f41a-3927-48b5-b98d-92991486001e",
+              "name": "developer_token",
+              "value": "b7Jj7ADOuQn-eCJnYL9p-g",
+              "type": "string"
+            },
+            {
+              "id": "656d5846-158b-4589-967a-a45ae0fac929",
+              "name": "google_api_version",
+              "value": "v20",
+              "type": "string"
+            },
+            {
+              "id": "d616de35-8b7f-4105-a017-2bfce312520f",
+              "name": "customer_id",
+              "value": "3158644952",
+              "type": "string"
+            },
+            {
+              "id": "2ea15a04-1ed2-4b8f-9f9b-04032be0a4f9",
+              "name": "google_account_1_name",
+              "value": "Celebrate Dental - Springfield ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1024,
+        1424
+      ],
+      "id": "1ac18531-0b35-4c1f-af12-dce2fad5cbd5",
+      "name": "Set Google Config"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000001",
+              "name": "access_token",
+              "value": "9dd776a9a4f3ea4ae4a5668dc39b3746ba7903ff",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000002",
+              "name": "advertiser_id",
+              "value": "7206469414487719938",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000003",
+              "name": "location_id",
+              "value": "springfield",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-0001-0001-0001-000000000004",
+              "name": "location_name",
+              "value": "Celebrate Dental - Springfield",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1216,
+        1424
+      ],
+      "id": "ef6aaf6c-c274-41db-bbdc-e414300af68d",
+      "name": "Set TikTok Config"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1NRjrAoH30_HxlARutNLQjYs5MnQig5lYe7OgfRs3jwo",
+          "mode": "list",
+          "cachedResultName": "KC/M Campaign Details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NRjrAoH30_HxlARutNLQjYs5MnQig5lYe7OgfRs3jwo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NRjrAoH30_HxlARutNLQjYs5MnQig5lYe7OgfRs3jwo/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -320,
+        272
+      ],
+      "id": "32379346-b4ff-4ab6-9521-0b43919c96c1",
+      "name": "Get Campaign Mapping",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v8Hhgg3DLgTs8R9D",
+          "name": "Google Sheets Account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Supabase Config": {
+      "main": [
+        [
+          {
+            "node": "Set Meta Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Req. Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WR - Get Meta Report": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Aggregate Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "WR - Get Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Springfield - Format Google for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Format Meta for Supabase": {
+      "main": [
+        [
+          {
+            "node": "Daily Metrics Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Top Campaigns Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting": {
+      "main": [
+        [
+          {
+            "node": "SP - Upsert to Supabase (Google - DC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates": {
+      "main": [
+        [
+          {
+            "node": "Set TikTok Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Req. Dates (Temp Testing)": {
+      "main": [
+        []
+      ]
+    },
+    "Springfield - Aggregate Google": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Format Google for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Metrics Formatting": {
+      "main": [
+        [
+          {
+            "node": "SP - Upsert to Supabase (Google - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Create Meta Report": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "West Republic - Aggregate Meta": {
+      "main": [
+        [
+          {
+            "node": "West Republic - Format Meta for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Metrics Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "WR - Upsert to Supabase (Meta - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top Campaigns Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "WR - Upsert to Supabase (Meta - TC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "NG - Get Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Meta Credentials": {
+      "main": [
+        [
+          {
+            "node": "North Glenstone - Create Meta Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "West Republic - Create Meta Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "North Lindbergh - Create Meta Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Campaign Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "North Glenstone - Create Meta Report": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NG - Get Meta Report": {
+      "main": [
+        [
+          {
+            "node": "North Glenstone - Aggregate Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "North Glenstone - Aggregate Meta": {
+      "main": [
+        [
+          {
+            "node": "North Glenstone - Format Meta for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "North Glenstone - Format Meta for Supabase": {
+      "main": [
+        [
+          {
+            "node": "NG - Daily Metrics Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NG - Top Campaigns Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NG - Daily Metrics Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "NG - Upsert to Supabase (Meta - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NG - Top Campaigns Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "NG - Upsert to Supabase (Meta - TC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "NL - Get Meta Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "North Lindbergh - Create Meta Report": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NL - Get Meta Report": {
+      "main": [
+        [
+          {
+            "node": "North Lindbergh - Aggregate Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "North Lindbergh - Aggregate Meta": {
+      "main": [
+        [
+          {
+            "node": "North Lindbergh - Format Meta for Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "North Lindbergh - Format Meta for Supabase": {
+      "main": [
+        [
+          {
+            "node": "NL - Daily Metrics Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NL - Top Campaigns Formatting (Meta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NL - Daily Metrics Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "NL - Upsert to Supabase (Meta - DM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NL - Top Campaigns Formatting (Meta)": {
+      "main": [
+        [
+          {
+            "node": "NL - Upsert to Supabase (Meta - TC)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Springfield - Get Google": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Aggregate Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set TikTok Config": {
+      "main": [
+        [
+          {
+            "node": "Set Google Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Google Config": {
+      "main": [
+        [
+          {
+            "node": "Set Supabase Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Campaign Mapping": {
+      "main": [
+        [
+          {
+            "node": "Springfield - Get Google",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "yT84l3hJEkaNS2GS",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "test-sublocation-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f03b8919fd05361b5c3eb796ae86ee1bb67c20678554d955a51a056d9b315a4d"
+  },
+  "tags": []
+}
