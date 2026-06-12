@@ -168,7 +168,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build campaign name -> location_id lookup from Google Sheet\nconst sheetRows = $('Get Campaign Mapping').all();\nconst campaignMap = {};\nconst LOCATION_SLUG = {\n  'West Republic':   'west-republic',\n  'North Glenstone': 'north-glenstone',\n  'North Lindbergh': 'north-lindbergh',\n};\nfor (const row of sheetRows) {\n  const name = (row.json['Campaign Name'] || '').trim();\n  const loc  = (row.json['Location'] || '').trim();\n  if (name && LOCATION_SLUG[loc]) {\n    campaignMap[name] = LOCATION_SLUG[loc];\n  }\n}\n\nfunction getSubLocation(campaignName) {\n  return campaignMap[campaignName] || 'springfield';\n}\n\nconst LOCATION_NAME = {\n  'west-republic':   'West Republic',\n  'north-glenstone': 'North Glenstone',\n  'north-lindbergh': 'North Lindbergh',\n  'springfield':     'Springfield',\n};\n\nconst results = items[0].json.results || [];\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of results) {\n  const date   = r.segments?.date || 'unknown';\n  const cost   = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr   = Number(r.metrics?.impressions || 0);\n  const clks   = Number(r.metrics?.clicks || 0);\n  const conv   = Number(r.metrics?.conversions || 0);\n  const cId    = String(r.campaign?.id || '');\n  const cName  = r.campaign?.name || 'Unknown';\n  const subLoc = getSubLocation(cName);\n\n  const dateKey = `${subLoc}::${date}`;\n  if (!dateMap[dateKey]) dateMap[dateKey] = { subLoc, date, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[dateKey].spend       += cost;\n  dateMap[dateKey].impressions += impr;\n  dateMap[dateKey].clicks      += clks;\n  dateMap[dateKey].conversions += conv;\n\n  const campKey = `${cId}::${date}::${subLoc}`;\n  if (!campaignDayMap[campKey]) {\n    campaignDayMap[campKey] = { subLoc, date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[campKey].spend       += cost;\n  campaignDayMap[campKey].impressions += impr;\n  campaignDayMap[campKey].clicks      += clks;\n  campaignDayMap[campKey].conversions += conv;\n}\n\nconst daily_rows = Object.values(dateMap).map(m => ({\n  location_id:   m.subLoc,\n  location_name: LOCATION_NAME[m.subLoc] || m.subLoc,\n  date:          m.date,\n  spend:         Number(m.spend.toFixed(2)),\n  impressions:   m.impressions,\n  clicks:        m.clicks,\n  conversions:   m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0,\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  location_id:   c.subLoc,\n  location_name: LOCATION_NAME[c.subLoc] || c.subLoc,\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null,\n}));\n\nreturn [{ json: { daily_rows, campaign_rows } }];\n"
+        "jsCode": "// Build campaign name -> location_id lookup from collected sheet data\nconst sheetData = $('Collect Campaign Mapping').first().json.campaignRows || [];\nconst campaignMap = {};\nconst LOCATION_SLUG = {\n  'West Republic':   'west-republic',\n  'North Glenstone': 'north-glenstone',\n  'North Lindbergh': 'north-lindbergh',\n};\nfor (const row of sheetData) {\n  const name = (row['Campaign Name'] || '').trim();\n  const loc  = (row['Location'] || '').trim();\n  if (name && LOCATION_SLUG[loc]) {\n    campaignMap[name] = LOCATION_SLUG[loc];\n  }\n}\n\nfunction getSubLocation(campaignName) {\n  return campaignMap[campaignName] || 'springfield';\n}\n\nconst LOCATION_NAME = {\n  'west-republic':   'West Republic',\n  'north-glenstone': 'North Glenstone',\n  'north-lindbergh': 'North Lindbergh',\n  'springfield':     'Springfield',\n};\n\nconst results = items[0].json.results || [];\nconst dateMap = {};\nconst campaignDayMap = {};\n\nfor (const r of results) {\n  const date   = r.segments?.date || 'unknown';\n  const cost   = Number(r.metrics?.costMicros || 0) / 1000000;\n  const impr   = Number(r.metrics?.impressions || 0);\n  const clks   = Number(r.metrics?.clicks || 0);\n  const conv   = Number(r.metrics?.conversions || 0);\n  const cId    = String(r.campaign?.id || '');\n  const cName  = r.campaign?.name || 'Unknown';\n  const subLoc = getSubLocation(cName);\n\n  const dateKey = `${subLoc}::${date}`;\n  if (!dateMap[dateKey]) dateMap[dateKey] = { subLoc, date, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  dateMap[dateKey].spend       += cost;\n  dateMap[dateKey].impressions += impr;\n  dateMap[dateKey].clicks      += clks;\n  dateMap[dateKey].conversions += conv;\n\n  const campKey = `${cId}::${date}::${subLoc}`;\n  if (!campaignDayMap[campKey]) {\n    campaignDayMap[campKey] = { subLoc, date, campaign_id: cId, campaign_name: cName, spend: 0, impressions: 0, clicks: 0, conversions: 0 };\n  }\n  campaignDayMap[campKey].spend       += cost;\n  campaignDayMap[campKey].impressions += impr;\n  campaignDayMap[campKey].clicks      += clks;\n  campaignDayMap[campKey].conversions += conv;\n}\n\nconst daily_rows = Object.values(dateMap).map(m => ({\n  location_id:   m.subLoc,\n  location_name: LOCATION_NAME[m.subLoc] || m.subLoc,\n  date:          m.date,\n  spend:         Number(m.spend.toFixed(2)),\n  impressions:   m.impressions,\n  clicks:        m.clicks,\n  conversions:   m.conversions,\n  cpl:  m.conversions > 0 ? Number((m.spend / m.conversions).toFixed(2)) : null,\n  ctr:  m.impressions > 0 ? Number((m.clicks / m.impressions * 100).toFixed(4)) : 0,\n}));\n\nconst campaign_rows = Object.values(campaignDayMap).map(c => ({\n  location_id:   c.subLoc,\n  location_name: LOCATION_NAME[c.subLoc] || c.subLoc,\n  date:          c.date,\n  campaign_id:   c.campaign_id,\n  campaign_name: c.campaign_name,\n  spend:         Number(c.spend.toFixed(2)),\n  impressions:   c.impressions,\n  clicks:        c.clicks,\n  conversions:   c.conversions,\n  cpl:  c.conversions > 0 ? Number((c.spend / c.conversions).toFixed(2)) : null,\n  ctr:  c.impressions > 0 ? Number((c.clicks / c.impressions * 100).toFixed(4)) : null,\n}));\n\nreturn [{ json: { daily_rows, campaign_rows } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1161,7 +1161,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        -320,
+        -480,
         272
       ],
       "id": "32379346-b4ff-4ab6-9521-0b43919c96c1",
@@ -1172,6 +1172,19 @@
           "name": "Google Sheets Account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collapse all sheet rows into one item so Springfield - Get Google runs once\nconst rows = $input.all().map(i => i.json);\nreturn [{ json: { campaignRows: rows } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        272
+      ],
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Collect Campaign Mapping"
     }
   ],
   "pinData": {},
@@ -1572,6 +1585,17 @@
       "main": [
         [
           {
+            "node": "Collect Campaign Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Campaign Mapping": {
+      "main": [
+        [
+          {
             "node": "Springfield - Get Google",
             "type": "main",
             "index": 0
@@ -1589,7 +1613,7 @@
     "errorWorkflow": "yT84l3hJEkaNS2GS",
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "test-sublocation-v1",
+  "versionId": "test-sublocation-v2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f03b8919fd05361b5c3eb796ae86ee1bb67c20678554d955a51a056d9b315a4d"
